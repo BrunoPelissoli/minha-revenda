@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Bruno Vendas — Loja</title>
+
+<style>
+:root{
+  --bg:#000;
+  --card:#0b0b0c;
+  --card2:#0f0f12;
+  --border:#1f1f24;
+  --text:#f5f5f5;
+  --muted:#a1a1aa;
+  --accent:#3b82f6;
+  --accent2:#2563eb;
+  --danger:#ef4444;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:var(--bg);
+  color:var(--text);
+}
+
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+
+.container{max-width:1100px;margin:0 auto;padding:18px}
+
+.topbar{
+  position:sticky; top:0; z-index:20;
+  background:rgba(0,0,0,.72);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.topbar .inner{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 18px;
+}
+.brand{
+  display:flex;align-items:center;gap:12px;
+}
+.logo{
+  width:40px;height:40px;border-radius:12px;
+  background:linear-gradient(135deg,var(--accent),#22c55e);
+  box-shadow:0 0 0 1px rgba(255,255,255,.06), 0 16px 40px rgba(59,130,246,.15);
+}
+.brand h1{
+  margin:0;font-size:18px;line-height:1.1;font-weight:900;letter-spacing:.2px;
+}
+.brand .sub{margin:0;color:var(--muted);font-size:13px}
+
+.badge{
+  font-size:12px;color:var(--muted);
+  border:1px solid var(--border);
+  padding:8px 10px;border-radius:999px;
+  background:rgba(255,255,255,.02);
+}
+
+.hero{
+  padding:22px 0 10px;
+}
+.hero-card{
+  background:linear-gradient(180deg, rgba(59,130,246,.18), rgba(0,0,0,0));
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+}
+.hero-title{font-size:22px;font-weight:900;margin:0}
+.hero-desc{color:var(--muted);margin:6px 0 0;font-size:14px;line-height:1.35}
+.search{
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+}
+.search input{
+  width:min(420px,100%);
+  background:var(--card);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:12px 12px;
+  border-radius:12px;
+  outline:none;
+  font-size:15px;
+}
+.search input:focus{border-color:rgba(59,130,246,.55);box-shadow:0 0 0 3px rgba(59,130,246,.14)}
+
+.grid-wrap{
+  display:grid;
+  grid-template-columns: 1fr 360px;
+  gap:16px;
+  align-items:start;
+}
+
+.products{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap:12px;
+}
+@media (max-width: 980px){
+  .grid-wrap{grid-template-columns:1fr}
+  .products{grid-template-columns: repeat(2, minmax(0,1fr));}
+}
+@media (max-width: 560px){
+  .products{grid-template-columns: 1fr;}
+  .hero-card{flex-direction:column;align-items:flex-start}
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px;
+}
+
+.pcard{
+  background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  min-height:170px;
+}
+.pimg{
+  height:74px;
+  background:radial-gradient(60% 140% at 20% 20%, rgba(59,130,246,.30), rgba(0,0,0,0)),
+             radial-gradient(70% 160% at 90% 10%, rgba(34,197,94,.18), rgba(0,0,0,0));
+  border-bottom:1px solid var(--border);
+}
+.pbody{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
+.pname{font-weight:900;font-size:15px;line-height:1.15}
+.pmeta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:12.5px}
+.price{font-weight:900;color:var(--text)}
+.stock{color:var(--muted)}
+.pactions{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:auto}
+.qty{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.02);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:8px 10px;
+}
+.qty button{
+  background:transparent;border:0;color:var(--text);
+  font-size:18px;line-height:1;
+  width:26px;height:26px;border-radius:8px;
+  cursor:pointer;
+}
+.qty button:hover{background:rgba(255,255,255,.05)}
+.qty span{min-width:22px;text-align:center;font-weight:800}
+
+.btn{
+  border:0;border-radius:12px;
+  padding:10px 12px;
+  font-weight:900;
+  cursor:pointer;
+  font-size:14px;
+}
+.btn-primary{background:var(--accent2);color:#fff}
+.btn-primary:hover{background:var(--accent)}
+.btn-ghost{
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  color:var(--text);
+}
+.btn-ghost:hover{background:rgba(255,255,255,.06)}
+
+.cart-title{font-weight:900;margin:0 0 8px;font-size:16px}
+.cart-muted{color:var(--muted);font-size:13px;margin:0 0 12px;line-height:1.35}
+.cart-items{display:flex;flex-direction:column;gap:10px;margin:10px 0 12px}
+.citem{
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:rgba(255,255,255,.02);
+  padding:10px;
+}
+.citem-top{display:flex;justify-content:space-between;gap:10px}
+.citem-name{font-weight:900;font-size:13.5px}
+.citem-sub{color:var(--muted);font-size:12px;margin-top:2px}
+.citem-actions{display:flex;gap:8px;align-items:center;margin-top:8px;justify-content:space-between}
+.citem-actions .btn{padding:8px 10px;border-radius:10px;font-size:12px}
+
+.total-row{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:12px;padding-top:12px;border-top:1px solid var(--border);
+}
+.total{font-size:20px;font-weight:900}
+
+.form label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px}
+.form input, .form textarea{
+  width:100%;
+  background:var(--card2);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:11px 12px;
+  border-radius:12px;
+  outline:none;
+  font-size:14px;
+}
+.form textarea{min-height:70px;resize:vertical}
+.form input:focus,.form textarea:focus{border-color:rgba(59,130,246,.55);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.msg{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.35}
+.msg.err{color:#fecaca}
+.msg.ok{color:#bbf7d0}
+
+.footer{
+  padding:22px 0 30px;
+  color:var(--muted);
+  font-size:12px;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="inner container">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>Bruno <span style="color:var(--accent)">Vendas</span></h1>
+        <p class="sub">Faça seu pedido em poucos cliques</p>
+      </div>
+    </div>
+    <div class="badge" id="badge-status">Carregando catálogo…</div>
+  </div>
+</div>
+
+<div class="container hero">
+  <div class="hero-card">
+    <div>
+      <p class="hero-title">Loja online</p>
+      <p class="hero-desc">Selecione os produtos, informe seu nome e WhatsApp e envie o pedido. Você receberá confirmação pelo WhatsApp.</p>
+    </div>
+    <div class="search">
+      <input id="q" placeholder="Buscar produto…" oninput="renderProdutos()" />
+      <button class="btn btn-ghost" onclick="recarregar()">Atualizar</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="container" style="margin-top:10px">
+  <div class="card" style="padding:12px">
+    <div style="font-weight:900;margin-bottom:6px">Diagnóstico</div>
+    <div class="muted" style="font-size:13px;line-height:1.35">
+      Endpoint catálogo: <span id="diag-url"></span><br/>
+      Resposta: <span id="diag-status">-</span><br/>
+      Mensagem: <span id="diag-msg">-</span>
+    </div>
+  </div>
+</div>
+
+<div class="container grid-wrap">
+  <div>
+    <div class="products" id="produtos"></div>
+    <div class="card" id="empty" style="display:none;margin-top:12px">
+      <b>Nenhum produto disponível</b>
+      <div class="cart-muted" style="margin-top:6px">Tente atualizar ou volte mais tarde.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="cart-title">Seu pedido</p>
+    <p class="cart-muted">Carrinho e dados para contato.</p>
+
+    <div class="cart-items" id="cart-items"></div>
+    <div class="total-row">
+      <div class="muted">Total</div>
+      <div class="total" id="cart-total">R$ 0,00</div>
+    </div>
+
+    <div class="form" style="margin-top:12px">
+      <label>Nome</label>
+      <input id="nome" placeholder="Seu nome"/>
+
+      <label>WhatsApp</label>
+      <input id="whatsapp" placeholder="(00) 00000-0000"/>
+
+      <label>Observação</label>
+      <textarea id="obs" placeholder="Ex.: retirar às 18h, cor/tamanho, etc."></textarea>
+
+      <!-- honeypot -->
+      <input id="website" style="display:none" autocomplete="off" tabindex="-1"/>
+
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn btn-primary" style="flex:1" onclick="enviar()">Enviar pedido</button>
+        <button class="btn btn-ghost" onclick="limparCarrinho()">Limpar</button>
+      </div>
+
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">© Bruno Vendas</div>
+
+<script>
+// URL base das Edge Functions (Supabase)
+const BASE = "https://bnsdsipilwcoipaqavfv.functions.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_8nI3DRhSJjJEVqlA6yZEdQ_lPa5yGOY";
+
+let catalogo = [];
+const cart = new Map(); // nome -> {nome, preco, qtd, estoque}
+
+const fmt = n => (Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+
+function diagSet(url, status, msg){
+  const u=document.getElementById('diag-url'); if(u) u.textContent=url;
+  const s=document.getElementById('diag-status'); if(s) s.textContent=status;
+  const m=document.getElementById('diag-msg'); if(m) m.textContent=msg || "-";
+}
+
+
+function setBadge(txt){
+  const el = document.getElementById('badge-status');
+  if(el) el.textContent = txt;
+}
+
+async function carregar(){
+  const url = `${BASE}/catalogo`;
+  setBadge("Carregando catálogo…");
+  diagSet(url, "carregando", "");
+  try{
+    const r = await fetch(url, { method:'GET', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } });
+    let j = {};
+    try{ j = await r.json(); }catch(e){ j = {}; }
+    if(!r.ok){
+      const err = (j && (j.error || j.message)) ? (j.error || j.message) : ("HTTP " + r.status);
+      diagSet(url, "erro", err);
+      setBadge("Erro ao carregar catálogo");
+      catalogo = [];
+      renderProdutos();
+      renderCarrinho();
+      return;
+    }
+
+    catalogo = Array.isArray(j.produtos) ? j.produtos : [];
+    diagSet(url, "ok", `produtos retornados: ${catalogo.length}`);
+    setBadge(catalogo.length ? `${catalogo.length} produto(s) disponível(is)` : "Sem produtos disponíveis");
+    renderProdutos();
+    renderCarrinho();
+  }catch(e){
+    console.error(e);
+    diagSet(url, "erro", (e && e.message) ? e.message : String(e));
+    setBadge("Erro ao carregar catálogo");
+    catalogo = [];
+    renderProdutos();
+    renderCarrinho();
+  }
+}
+
+function recarregar(){
+  
+function enviarWhatsApp(nome, whatsappLoja, itens, total){
+  const linhas = [];
+  linhas.push("Olá Bruno Vendas! Gostaria de fazer o seguinte pedido:");
+  linhas.push("");
+  itens.forEach(i=>{
+    linhas.push(`• ${i.nome} - qtd: ${i.qtd}`);
+  });
+  linhas.push("");
+  linhas.push("Total: " + total);
+  linhas.push("");
+  linhas.push("Cliente: " + nome);
+
+  const texto = encodeURIComponent(linhas.join("\n"));
+  const url = `https://wa.me/${whatsappLoja}?text=${texto}`;
+  window.open(url, "_blank");
+}
+
+carregar();
+}
+
+function normalize(s){
+  return (s||"").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+}
+
+function renderProdutos(){
+  const q = normalize(document.getElementById('q').value);
+  const wrap = document.getElementById('produtos');
+  const empty = document.getElementById('empty');
+
+  const list = catalogo
+    .filter(p => p && p.nome && Number(p.estoque||0) > 0)
+    .filter(p => !q || normalize(p.nome).includes(q));
+
+  wrap.innerHTML = "";
+  empty.style.display = list.length ? 'none' : 'block';
+
+  list.forEach(p => {
+    const name = p.nome;
+    const preco = Number(p.preco||0);
+    const estoque = Math.max(0, Math.floor(Number(p.estoque||0)));
+
+    const inCart = cart.get(name);
+    const qtd = inCart ? inCart.qtd : 0;
+
+    const el = document.createElement('div');
+    el.className = 'pcard';
+    el.innerHTML = `
+      <div class="pimg"></div>
+      <div class="pbody">
+        <div class="pname">${escapeHtml(name)}</div>
+        <div class="pmeta">
+          <div class="price">${fmt(preco)}</div>
+          <div class="stock">estoque: ${estoque}</div>
+        </div>
+        <div class="pactions">
+          <div class="qty">
+            <button onclick="dec('${escAttr(name)}')">−</button>
+            <span id="qtd-${escId(name)}">${qtd}</span>
+            <button onclick="inc('${escAttr(name)}')">+</button>
+          </div>
+          <button class="btn btn-ghost" onclick="addOne('${escAttr(name)}')">Adicionar</button>
+        </div>
+      </div>
+    `;
+    wrap.appendChild(el);
+  });
+}
+
+function escId(s){ return btoa(unescape(encodeURIComponent(s))).replace(/=+/g,''); }
+function escAttr(s){ return s.replace(/'/g,"\'"); }
+function escapeHtml(s){
+  return (s||"").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+function getProduto(nome){
+  return catalogo.find(p => p && p.nome === nome);
+}
+
+function setQtd(nome, qtd){
+  const p = getProduto(nome);
+  if(!p) return;
+  const estoque = Math.max(0, Math.floor(Number(p.estoque||0)));
+  const preco = Number(p.preco||0);
+  const q = Math.max(0, Math.min(estoque, Math.floor(qtd)));
+
+  if(q <= 0) cart.delete(nome);
+  else cart.set(nome, { nome, preco, qtd:q, estoque });
+
+  const span = document.getElementById('qtd-'+escId(nome));
+  if(span) span.textContent = cart.get(nome)?.qtd || 0;
+
+  renderCarrinho();
+}
+
+function inc(nome){
+  const cur = cart.get(nome)?.qtd || 0;
+  setQtd(nome, cur + 1);
+}
+function dec(nome){
+  const cur = cart.get(nome)?.qtd || 0;
+  setQtd(nome, cur - 1);
+}
+function addOne(nome){ inc(nome); }
+
+function renderCarrinho(){
+  const wrap = document.getElementById('cart-items');
+  wrap.innerHTML = "";
+
+  let total = 0;
+  if(cart.size === 0){
+    wrap.innerHTML = '<div class="muted">Seu carrinho está vazio.</div>';
+  } else {
+    cart.forEach(item => {
+      const subtotal = Number(item.preco||0) * Number(item.qtd||0);
+      total += subtotal;
+
+      const div = document.createElement('div');
+      div.className = 'citem';
+      div.innerHTML = `
+        <div class="citem-top">
+          <div>
+            <div class="citem-name">${escapeHtml(item.nome)}</div>
+            <div class="citem-sub">${fmt(item.preco)} · qtd: ${item.qtd} · subtotal: ${fmt(subtotal)}</div>
+          </div>
+          <button class="btn btn-ghost" onclick="setQtd('${escAttr(item.nome)}',0)">Remover</button>
+        </div>
+        <div class="citem-actions">
+          <div class="qty" style="padding:6px 8px">
+            <button onclick="dec('${escAttr(item.nome)}')">−</button>
+            <span>${item.qtd}</span>
+            <button onclick="inc('${escAttr(item.nome)}')">+</button>
+          </div>
+          <div class="muted">máx: ${item.estoque}</div>
+        </div>
+      `;
+      wrap.appendChild(div);
+    });
+  }
+
+  document.getElementById('cart-total').textContent = fmt(total);
+}
+
+function limparCarrinho(){
+  cart.clear();
+  renderProdutos();
+  renderCarrinho();
+  setMsg("");
+}
+
+function setMsg(text, type){
+  const el = document.getElementById('msg');
+  el.className = 'msg' + (type ? (' '+type) : '');
+  el.textContent = text || "";
+}
+
+async function enviar(){
+  const nome = document.getElementById('nome').value.trim();
+  const whatsapp = document.getElementById('whatsapp').value.trim();
+  const observacao = document.getElementById('obs').value.trim();
+  const website = document.getElementById('website').value;
+
+  const itens = [];
+  cart.forEach(item => itens.push({ nome: item.nome, qtd: item.qtd }));
+
+  setMsg("");
+
+  if(!nome || !whatsapp){
+    setMsg("Preencha Nome e WhatsApp.", "err");
+    return;
+  }
+  if(itens.length === 0){
+    setMsg("Selecione ao menos 1 produto.", "err");
+    return;
+  }
+
+  try{
+    setMsg("Enviando pedido…");
+    const r = await fetch(`${BASE}/pedido`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ nome, whatsapp, observacao, itens, website })
+    });
+
+    const j = await r.json().catch(()=> ({}));
+
+    if(!r.ok || !j.ok){
+      setMsg(j.error || "Erro ao enviar pedido.", "err");
+      return;
+    }
+
+    setMsg(`Pedido enviado! Nº ${j.pedido_id}. Clique abaixo para enviar no WhatsApp também.`, "ok");
+
+    const totalTexto = document.getElementById('cart-total').textContent;
+    const itensEnviar = [];
+    cart.forEach(item => itensEnviar.push({ nome: item.nome, qtd: item.qtd }));
+
+    const btn = document.createElement('button');
+    btn.className = "btn btn-primary";
+    btn.style.marginTop = "10px";
+    btn.textContent = "Enviar também pelo WhatsApp";
+    btn.onclick = function(){
+      enviarWhatsApp(nome, "5551995029064", itensEnviar, totalTexto);
+    };
+
+    const msgDiv = document.getElementById('msg');
+    msgDiv.appendChild(document.createElement('br'));
+    msgDiv.appendChild(btn);
+
+    limparCarrinho();
+  }catch(e){
+    console.error(e);
+    setMsg("Erro de conexão.", "err");
+  }
+}
+
+
+function enviarWhatsApp(nome, whatsappLoja, itens, total){
+  const linhas = [];
+  linhas.push("Olá Bruno Vendas! Gostaria de fazer o seguinte pedido:");
+  linhas.push("");
+  itens.forEach(i=>{
+    linhas.push(`• ${i.nome} - qtd: ${i.qtd}`);
+  });
+  linhas.push("");
+  linhas.push("Total: " + total);
+  linhas.push("");
+  linhas.push("Cliente: " + nome);
+
+  const texto = encodeURIComponent(linhas.join("\n"));
+  const url = `https://wa.me/${whatsappLoja}?text=${texto}`;
+  window.open(url, "_blank");
+}
+
+carregar();
+</script>
+</body>
+</html>
