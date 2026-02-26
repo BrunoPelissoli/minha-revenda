@@ -1314,6 +1314,16 @@ async function sincronizarAgora(){
     alert('Você precisa estar logado para sincronizar.');
     return;
   }
+
+
+// Garantir que as funções fiquem disponíveis para onclick (GitHub Pages/escopo pode variar)
+window.setAuthStatus = window.setAuthStatus || setAuthStatus;
+window.sincronizarAgora = window.sincronizarAgora || sincronizarAgora;
+window.exportarDados = window.exportarDados || exportarDados;
+window.importarDados = window.importarDados || importarDados;
+window.baixarModeloVazio = window.baixarModeloVazio || baixarModeloVazio;
+window.limparBanco = window.limparBanco || limparBanco;
+
   var ok = await salvarOnline();
   if(ok) alert('Sincronizado com sucesso.');
   else alert('Não foi possível sincronizar. Verifique internet e permissões.');
