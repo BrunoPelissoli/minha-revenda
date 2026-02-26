@@ -365,7 +365,7 @@ label{
   <div id="page-relatorios" class="page">
     <div class="page-header"><div class="page-title">Relatórios <small>Análise do negócio</small></div></div>
     <div class="cards-grid" style="margin-bottom:24px">
-      <div class="card"><div class="card-label" style="margin-bottom:8px">ESTOQUE EM CUSTO</div><div class="card-value" id="rel-estoque-custo">R$ 0,00</div></div>
+      <div class="card"><div class="card-label" style="margin-bottom:8px">CUSTO DO ESTOQUE</div><div class="card-value" id="rel-estoque-custo">R$ 0,00</div></div>
       <div class="card"><div class="card-label" style="margin-bottom:8px">VALOR DO ESTOQUE</div><div class="card-value" id="rel-ticket">R$ 0,00</div></div>
       <div class="card"><div class="card-label" style="margin-bottom:8px">MARGEM MÉDIA</div><div class="card-value" id="rel-margem">0%</div></div>
       <div class="card"><div class="card-label" style="margin-bottom:8px">PRODUTO + VENDIDO</div><div class="card-value" id="rel-top" style="font-size:16px">—</div></div>
@@ -1096,9 +1096,9 @@ function renderDashboard(){
     var c=lastCostByIdx[x.idx]?Number(lastCostByIdx[x.idx].c||0):0;
     return s + (c*Number(x.p.estoque||0));
   },0);
-  var totalInv=totalCompras + custoEstoqueAtual;
+  var totalInv=totalCompras;
   document.getElementById('dash-receita').textContent=fmt(vendas.filter(function(v){return v.pgto==='pago' || (v.pgto==='fiado' && v.fiadoPago);}).reduce(function(s,v){return s+v.total;},0));
-  document.getElementById('dash-lucro').textContent=fmt(vendas.reduce(function(s,v){return s+v.itens.reduce(function(ss,i){return ss+(i.preco-i.custo)*i.qtd;},0);},0));
+  document.getElementById('dash-lucro').textContent=fmt(vendas.filter(function(v){return v.pgto==='pago' || (v.pgto==='fiado' && v.fiadoPago);}).reduce(function(s,v){return s+v.itens.reduce(function(ss,i){return ss+(i.preco-i.custo)*i.qtd;},0);},0));
   document.getElementById('dash-investido').textContent=fmt(totalInv);
   document.getElementById('dash-vendas').textContent=vendas.length;
   var totalFiado=db.vendas.filter(function(v){return v.pgto==='fiado'&&!v.fiadoPago;}).reduce(function(s,v){return s+v.total;},0);
@@ -1112,7 +1112,7 @@ function renderDashboard(){
   document.getElementById('chart-vendas-title').textContent=range?'Vendas por dia (período selecionado)':'Vendas dos últimos 7 dias';
   if(chartVendasInst)chartVendasInst.destroy();
   chartVendasInst=new Chart(document.getElementById('chartVendas').getContext('2d'),{type:'line',data:{labels:labels,datasets:[{label:'Receita',data:valores,borderColor:'#c8f135',backgroundColor:'rgba(200,241,53,.1)',fill:true,tension:.4,pointBackgroundColor:'#c8f135'}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{color:'#2e2e2e'},ticks:{color:'#888',font:{size:11}}},y:{grid:{color:'#2e2e2e'},ticks:{color:'#888',font:{size:11},callback:function(v){return 'R$'+v;}}}},responsive:true}});
-  var baixo=db.produtos.filter(function(p){return p.estoque<=5;});
+  var baixo=db.produtos.filter(function(p){return p && !p.excluido && Number(p.estoque||0) <= Number(p.estoqueBaixo||5);});
   var alertaDiv=document.getElementById('estoque-alerta');
   if(!baixo.length){alertaDiv.innerHTML='<p style="color:var(--muted);font-size:14px;margin-top:16px">✅ Todos os produtos com estoque adequado.</p>';return;}
   alertaDiv.innerHTML=baixo.map(function(p){return '<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px"><span>'+esc(p.nome)+'</span><span class="badge '+(p.estoque<=0?'badge-out':'badge-low')+'">'+(p.estoque<=0?'Esgotado':p.estoque+' un.')+'</span></div>';}).join('');
@@ -1121,7 +1121,7 @@ function renderDashboard(){
 // ─── RELATÓRIOS ───────────────────────────────────────────────────────────────
 var chartProdInst=null;
 function renderRelatorios(){
-    // Estoque em Custo: considera apenas produtos ativos (não excluídos) com estoque > 0
+    // Custo do Estoque: considera apenas produtos ativos (não excluídos) com estoque > 0
   var estoqueCusto = db.produtos
     .filter(function(p){ return p && !p.excluido && Number(p.estoque||0) > 0; })
     .reduce(function(s,p){ return s + (Number(p.custo||0) * Number(p.estoque||0)); }, 0);
