@@ -450,6 +450,48 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
 </div>
 
 
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC1hnjmxjO8113aQXazTSXxrTFnuATNRK0",
+    authDomain: "minharevenda-11da6.firebaseapp.com",
+    projectId: "minharevenda-11da6",
+    storageBucket: "minharevenda-11da6.firebasestorage.app",
+    messagingSenderId: "272053134073",
+    appId: "1:272053134073:web:dd4360b1ce3acbe3353828",
+    measurementId: "G-9YC5D9QC1P"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const dbfs = getFirestore(app);
+
+  window.__FB = {
+    auth,
+    dbfs,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged,
+    doc,
+    getDoc,
+    setDoc
+  };
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
 // ─── DADOS ────────────────────────────────────────────────────────────────────
@@ -1171,61 +1213,16 @@ function limparBanco(){
 }
 
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-atualizarBadgeFiado();
-renderDashboard();
-setupTabelaProdutosListeners();
-</script>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-  import {
-    getAuth,
-    GoogleAuthProvider,
-    signInWithPopup,
-    signOut,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import {
-    getFirestore,
-    doc,
-    getDoc,
-    setDoc
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyC1hnjmxjO8113aQXazTSXxrTFnuATNRK0",
-    authDomain: "minharevenda-11da6.firebaseapp.com",
-    projectId: "minharevenda-11da6",
-    storageBucket: "minharevenda-11da6.firebasestorage.app",
-    messagingSenderId: "272053134073",
-    appId: "1:272053134073:web:dd4360b1ce3acbe3353828",
-    measurementId: "G-9YC5D9QC1P"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const dbfs = getFirestore(app);
-
-  window.__FB = {
-    auth,
-    dbfs,
-    GoogleAuthProvider,
-    signInWithPopup,
-    signOut,
-    onAuthStateChanged,
-    doc,
-    getDoc,
-    setDoc
-  };
-
 
 // ─── FIREBASE ONLINE PERSISTENCE ───────────────────────────────────────────
 var currentUid = null;
 var saveTimer = null;
 
+// sobrescreve save() para também gravar online (com debounce)
 function save(){
+  // backup local
   localStorage.setItem('mrevenda', JSON.stringify(db));
+
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function(){
     salvarOnline();
@@ -1233,14 +1230,14 @@ function save(){
 }
 
 async function carregarOnline(){
-  if(!currentUid) return false;
+  if(!currentUid || !window.__FB) return false;
   try{
     var FB = window.__FB;
     var ref = FB.doc(FB.dbfs, "users", currentUid, "apps", "mrevenda");
     var snap = await FB.getDoc(ref);
     if(snap.exists()){
       var data = snap.data();
-      if(data && data.db){
+      if(data && data.db && Array.isArray(data.db.produtos) && Array.isArray(data.db.vendas) && Array.isArray(data.db.movimentacoes)){
         db = data.db;
         localStorage.setItem('mrevenda', JSON.stringify(db));
         return true;
@@ -1253,7 +1250,7 @@ async function carregarOnline(){
 }
 
 async function salvarOnline(){
-  if(!currentUid) return false;
+  if(!currentUid || !window.__FB) return false;
   try{
     var FB = window.__FB;
     var ref = FB.doc(FB.dbfs, "users", currentUid, "apps", "mrevenda");
@@ -1264,30 +1261,36 @@ async function salvarOnline(){
   }
 }
 
-async function loginGoogle(){
+window.loginGoogle = async function(){
+  if(!window.__FB) { alert('Firebase ainda não carregou. Recarregue a página.'); return; }
   var FB = window.__FB;
   var prov = new FB.GoogleAuthProvider();
   await FB.signInWithPopup(FB.auth, prov);
-}
+};
 
-async function logout(){
+window.logout = async function(){
+  if(!window.__FB) return;
   var FB = window.__FB;
   await FB.signOut(FB.auth);
-}
+};
 
-(function initFirebase(){
+function initFirebaseAuthSync(){
+  if(!window.__FB) return;
+
   var FB = window.__FB;
-  if(!FB) return;
-
   FB.onAuthStateChanged(FB.auth, async function(user){
     if(!user){
       currentUid = null;
+
+      // fallback local (para não ficar tudo zerado)
       try{
         var local = JSON.parse(localStorage.getItem('mrevenda') || 'null');
         if(local) db = local;
       }catch(e){}
-      renderDashboard();
+
       atualizarBadgeFiado();
+      // re-render apenas a tela atual (default: dashboard)
+      renderDashboard();
       return;
     }
 
@@ -1295,15 +1298,22 @@ async function logout(){
 
     var ok = await carregarOnline();
     if(!ok){
+      // se não existir ainda no Firestore, subimos o que estiver local (se houver)
       await salvarOnline();
     }
 
-    renderDashboard();
     atualizarBadgeFiado();
+    renderDashboard();
   });
-})();
+}
 
-
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+atualizarBadgeFiado();
+renderDashboard();
+setupTabelaProdutosListeners();
+initFirebaseAuthSync();
 </script>
+
+
 </body>
 </html>
