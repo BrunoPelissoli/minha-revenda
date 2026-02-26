@@ -146,11 +146,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
 
 <div class="sidebar">
   <div class="logo">Minha<span>Revenda</span></div>
-<div style="padding:12px 24px;display:flex;gap:8px;flex-direction:column">
-  <button class="btn btn-secondary" onclick="loginGoogle()">Entrar</button>
-  <button class="btn btn-secondary" onclick="logout()">Sair</button>
-</div>
-
   <nav class="nav">
     <div class="nav-item active" id="nav-dashboard" onclick="goTo('dashboard')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
@@ -343,7 +338,38 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
   <div id="page-dados" class="page">
     <div class="page-header">
       <div class="page-title">Importar / Exportar <small>Backup e manutenção do banco local</small></div>
+    
+    <div class="card" style="margin-bottom:16px">
+      <div style="font-size:14px;font-weight:900;margin-bottom:8px">Conta (Supabase)</div>
+      <div style="color:var(--muted);font-size:13px;line-height:1.45;margin-bottom:12px">
+        Faça login para sincronizar automaticamente entre dispositivos.
+      </div>
+
+      <div class="form-row" style="grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label>Email</label>
+          <input id="sb-email" type="email" placeholder="seu@email.com" />
+        </div>
+        <div>
+          <label>Senha</label>
+          <input id="sb-pass" type="password" placeholder="••••••••" />
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn btn-primary" onclick="sbLogin()">Entrar</button>
+        <button class="btn btn-secondary" onclick="sbSignup()">Criar conta</button>
+        <button class="btn btn-secondary" onclick="sbLogout()">Sair</button>
+        <button class="btn btn-secondary" onclick="sbSyncPull()">⬇️ Puxar do online</button>
+        <button class="btn btn-secondary" onclick="sbSyncPush()">⬆️ Enviar para o online</button>
+      </div>
+
+      <div style="margin-top:10px;color:var(--muted);font-size:12px">
+        Status: <span id="sb-status">desconectado</span>
+      </div>
     </div>
+
+</div>
 
     <div class="dados-grid">
       <div class="card">
@@ -352,10 +378,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
           Gera um arquivo <strong>.json</strong> com Produtos, Vendas e Movimentações (localStorage).
         </div>
         <div class="dados-actions">
-          <div class="dados-actions">
           <button class="btn btn-primary" onclick="exportarDados()">⬇️ Exportar JSON</button>
-          <button class="btn btn-secondary" onclick="sincronizarAgora()">🔄 Sincronizar agora</button>
-        </div>
         </div>
       </div>
 
@@ -453,52 +476,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
 </div>
 
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-  import {
-    getAuth,
-    GoogleAuthProvider,
-    signInWithPopup,
-    signOut,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import {
-    getFirestore,
-    doc,
-    getDoc,
-    setDoc
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyC1hnjmxjO8113aQXazTSXxrTFnuATNRK0",
-    authDomain: "minharevenda-11da6.firebaseapp.com",
-    projectId: "minharevenda-11da6",
-    storageBucket: "minharevenda-11da6.firebasestorage.app",
-    messagingSenderId: "272053134073",
-    appId: "1:272053134073:web:dd4360b1ce3acbe3353828",
-    measurementId: "G-9YC5D9QC1P"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const dbfs = getFirestore(app);
-
-  window.__FB = {
-    auth,
-    dbfs,
-    GoogleAuthProvider,
-    signInWithPopup,
-    signOut,
-    onAuthStateChanged,
-    doc,
-    getDoc,
-    setDoc
-  };
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
 // ─── DADOS ────────────────────────────────────────────────────────────────────
-var db = {produtos:[],vendas:[],movimentacoes:[]};
+var db = JSON.parse(localStorage.getItem('mrevenda') || 'null') || {produtos:[],vendas:[],movimentacoes:[]};
 var carrinho = [];
 var fiadoTab = 'devendo';
 var historicoTab = 'vendas';
@@ -584,6 +566,18 @@ var historicoTab = 'vendas';
   });
 })();
 
+function save(){
+  // sempre salva local (offline-first)
+  localStorage.setItem('mrevenda', JSON.stringify(db));
+
+  // se houver sessão Supabase, também salva online (com debounce)
+  if(window.__SB && window.__SB.userId){
+    clearTimeout(window.__SB.saveTimer);
+    window.__SB.saveTimer = setTimeout(function(){
+      sbSyncPush(false);
+    }, 700);
+  }
+}
 
 // ─── NAVEGAÇÃO ────────────────────────────────────────────────────────────────
 function preencherDatalistCategorias(){
@@ -781,7 +775,8 @@ function renderProdutos(){
   if(!indices.length){
     tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">Nenhum produto cadastrado.</td></tr>';
     setupTabelaProdutosListeners();
-    return;
+    sbInit();
+return;
   }
   var html='';
   indices.forEach(function(i){
@@ -1217,145 +1212,183 @@ function limparBanco(){
 
 
 
-// ─── FIREBASE ONLINE PERSISTENCE ───────────────────────────────────────────
-var currentUid = null;
-var saveTimer = null;
+// ─── SUPABASE ONLINE SYNC ──────────────────────────────────────────────────
+// Preencha as constantes abaixo com os dados do seu projeto Supabase:
+var SUPABASE_URL = "https://bnsdsipilwcoipaqavfv.supabase.co";      // ex: https://xxxx.supabase.co
+var SUPABASE_ANON_KEY = "sb_publishable_8nI3DRhSJjJEVqlA6yZEdQ_lPa5yGOY";     // ex: eyJhbGciOi...
 
-// sobrescreve save() para também gravar online (com debounce)
-function save(){
-  // backup local
-  localStorage.setItem('mrevenda', JSON.stringify(db));
-
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(function(){
-    salvarOnline();
-  }, 700);
-}
-
-async function carregarOnline(){
-  if(!currentUid || !window.__FB) return false;
-  try{
-    var FB = window.__FB;
-    var ref = FB.doc(FB.dbfs, "users", currentUid, "apps", "mrevenda");
-    var snap = await FB.getDoc(ref);
-    if(snap.exists()){
-      var data = snap.data();
-      if(data && data.db && Array.isArray(data.db.produtos) && Array.isArray(data.db.vendas) && Array.isArray(data.db.movimentacoes)){
-        db = data.db;
-        localStorage.setItem('mrevenda', JSON.stringify(db));
-        return true;
-      }
-    }
-    return false;
-  }catch(e){
-    return false;
-  }
-}
-
-async function salvarOnline(){
-  if(!currentUid || !window.__FB) return false;
-  try{
-    var FB = window.__FB;
-    var ref = FB.doc(FB.dbfs, "users", currentUid, "apps", "mrevenda");
-    await FB.setDoc(ref, { db: db, updatedAt: new Date().toISOString() }, { merge: true });
-    return true;
-  }catch(e){
-    return false;
-  }
-}
-
-window.loginGoogle = async function(){
-  if(!window.__FB){ alert('Firebase ainda não carregou. Recarregue a página.'); return; }
-  try{
-    var FB = window.__FB;
-    var prov = new FB.GoogleAuthProvider();
-    var cred = await FB.signInWithPopup(FB.auth, prov);
-    var email = (cred && cred.user && cred.user.email) ? cred.user.email : 'ok';
-    alert('Login realizado: ' + email);
-  }catch(e){
-    console.error('Login falhou', e);
-    alert('Login falhou: ' + (e && e.message ? e.message : e));
-  }
+window.__SB = {
+  client: null,
+  userId: null,
+  email: null,
+  saveTimer: null
 };
 
-window.logout = async function(){
-  if(!window.__FB) return;
-  try{
-    var FB = window.__FB;
-    await FB.signOut(FB.auth);
-    alert('Você saiu da conta.');
-  }catch(e){
-    console.error('Logout falhou', e);
-  }
-};
-
-function initFirebaseAuthSync(){
-  if(!window.__FB) return;
-
-  var FB = window.__FB;
-  FB.onAuthStateChanged(FB.auth, async function(user){
-    if(!user){
-      currentUid = null;
-      setAuthStatus('desconectado');
-
-      // fallback local (para não ficar tudo zerado)
-      try{
-        var local = JSON.parse(localStorage.getItem('mrevenda') || 'null');
-        if(local) db = local;
-      }catch(e){}
-
-function setAuthStatus(txt){
-  var el = document.getElementById('auth-status-text');
+function sbSetStatus(txt){
+  var el = document.getElementById('sb-status');
   if(el) el.textContent = txt;
 }
 
-async function sincronizarAgora(){
-  if(!currentUid){
-    alert('Você precisa estar logado para sincronizar.');
-    return;
+function sbInit(){
+  try{
+    if(!SUPABASE_URL || SUPABASE_URL.indexOf('COLE_AQUI')>=0) { sbSetStatus('config pendente'); return; }
+    if(!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.indexOf('COLE_AQUI')>=0) { sbSetStatus('config pendente'); return; }
+
+    var createClient = (window.supabase && window.supabase.createClient) ? window.supabase.createClient : null;
+    if(!createClient){ sbSetStatus('SDK não carregou'); return; }
+
+    window.__SB.client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // estado inicial
+    window.__SB.client.auth.getSession().then(function(res){
+      var sess = res && res.data ? res.data.session : null;
+      if(sess && sess.user){
+        window.__SB.userId = sess.user.id;
+        window.__SB.email = sess.user.email || null;
+        sbSetStatus(window.__SB.email || ('uid ' + window.__SB.userId.slice(0,6)));
+      }else{
+        sbSetStatus('desconectado');
+      }
+    });
+
+    // mudanças de auth
+    window.__SB.client.auth.onAuthStateChange(function(evt, session){
+      if(session && session.user){
+        window.__SB.userId = session.user.id;
+        window.__SB.email = session.user.email || null;
+        sbSetStatus(window.__SB.email || ('uid ' + window.__SB.userId.slice(0,6)));
+      }else{
+        window.__SB.userId = null;
+        window.__SB.email = null;
+        sbSetStatus('desconectado');
+      }
+    });
+  }catch(e){
+    console.error(e);
+    sbSetStatus('erro init');
   }
-
-
-// Garantir que as funções fiquem disponíveis para onclick (GitHub Pages/escopo pode variar)
-window.setAuthStatus = window.setAuthStatus || setAuthStatus;
-window.sincronizarAgora = window.sincronizarAgora || sincronizarAgora;
-window.exportarDados = window.exportarDados || exportarDados;
-window.importarDados = window.importarDados || importarDados;
-window.baixarModeloVazio = window.baixarModeloVazio || baixarModeloVazio;
-window.limparBanco = window.limparBanco || limparBanco;
-
-  var ok = await salvarOnline();
-  if(ok) alert('Sincronizado com sucesso.');
-  else alert('Não foi possível sincronizar. Verifique internet e permissões.');
 }
 
+async function sbLogin(){
+  try{
+    if(!window.__SB.client){ sbInit(); }
+    var email = (document.getElementById('sb-email')||{}).value || '';
+    var pass = (document.getElementById('sb-pass')||{}).value || '';
+    if(!email || !pass){ alert('Informe email e senha.'); return; }
+    var r = await window.__SB.client.auth.signInWithPassword({ email: email, password: pass });
+    if(r.error) throw r.error;
+    alert('Login realizado.');
+  }catch(e){
+    console.error(e);
+    alert('Falha no login: ' + (e && e.message ? e.message : e));
+  }
+}
 
-      atualizarBadgeFiado();
-      // re-render apenas a tela atual (default: dashboard)
-      renderDashboard();
-      return;
+async function sbSignup(){
+  try{
+    if(!window.__SB.client){ sbInit(); }
+    var email = (document.getElementById('sb-email')||{}).value || '';
+    var pass = (document.getElementById('sb-pass')||{}).value || '';
+    if(!email || !pass){ alert('Informe email e senha.'); return; }
+    var r = await window.__SB.client.auth.signUp({ email: email, password: pass });
+    if(r.error) throw r.error;
+    alert('Conta criada. Se precisar, confirme o email e faça login.');
+  }catch(e){
+    console.error(e);
+    alert('Falha ao criar conta: ' + (e && e.message ? e.message : e));
+  }
+}
+
+async function sbLogout(){
+  try{
+    if(!window.__SB.client){ return; }
+    var r = await window.__SB.client.auth.signOut();
+    if(r.error) throw r.error;
+    alert('Você saiu.');
+  }catch(e){
+    console.error(e);
+  }
+}
+
+// Puxa do online (substitui o banco local)
+async function sbSyncPull(showAlerts=true){
+  try{
+    if(!window.__SB.client){ sbInit(); }
+    if(!window.__SB.userId){ alert('Faça login para puxar do online.'); return false; }
+
+    var r = await window.__SB.client
+      .from('revenda_db')
+      .select('db')
+      .eq('user_id', window.__SB.userId)
+      .maybeSingle();
+
+    if(r.error) throw r.error;
+
+    if(!r.data || !r.data.db){
+      if(showAlerts) alert('Nenhum dado online encontrado ainda.');
+      return false;
     }
 
-    currentUid = user.uid;
-
-    var ok = await carregarOnline();
-    if(!ok){
-      // se não existir ainda no Firestore, subimos o que estiver local (se houver)
-      await salvarOnline();
+    var novo = r.data.db;
+    if(!novo || !Array.isArray(novo.produtos) || !Array.isArray(novo.vendas) || !Array.isArray(novo.movimentacoes)){
+      throw new Error('Estrutura inválida no online.');
     }
 
+    db = novo;
+    localStorage.setItem('mrevenda', JSON.stringify(db));
     atualizarBadgeFiado();
     renderDashboard();
-  });
+    if(showAlerts) alert('Dados carregados do online.');
+    return true;
+  }catch(e){
+    console.error(e);
+    if(showAlerts) alert('Falha ao puxar do online: ' + (e && e.message ? e.message : e));
+    return false;
+  }
 }
+
+// Envia para o online (upsert)
+async function sbSyncPush(showAlerts=true){
+  try{
+    if(!window.__SB.client){ sbInit(); }
+    if(!window.__SB.userId){
+      if(showAlerts) alert('Faça login para enviar ao online.');
+      return false;
+    }
+
+    var payload = {
+      user_id: window.__SB.userId,
+      db: db,
+      updated_at: new Date().toISOString()
+    };
+
+    var r = await window.__SB.client
+      .from('revenda_db')
+      .upsert(payload, { onConflict: 'user_id' });
+
+    if(r.error) throw r.error;
+
+    if(showAlerts) alert('Sincronizado com sucesso.');
+    return true;
+  }catch(e){
+    console.error(e);
+    if(showAlerts) alert('Falha ao enviar ao online: ' + (e && e.message ? e.message : e));
+    return false;
+  }
+}
+
+// expor para onclick
+window.sbLogin = sbLogin;
+window.sbSignup = sbSignup;
+window.sbLogout = sbLogout;
+window.sbSyncPull = sbSyncPull;
+window.sbSyncPush = sbSyncPush;
+
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 atualizarBadgeFiado();
 renderDashboard();
 setupTabelaProdutosListeners();
-initFirebaseAuthSync();
 </script>
-
-
 </body>
 </html>
