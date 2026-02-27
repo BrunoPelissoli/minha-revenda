@@ -1867,12 +1867,11 @@ function sbInit(){
         window.__SB.userId = sess.user.id;
         window.__SB.email = sess.user.email || null;
         sbSetStatus(window.__SB.email || ('uid ' + window.__SB.userId.slice(0,6)));
-
-        // força pull inicial obrigatório após login (evita sobrescrever online com dados locais vazios)
-        sbSyncPull(false, true).then(function(){
-          window.__SYNC_GUARD.pulledAfterLogin = true;
-          sbStartAutoPull();
-        });
+        sbSyncPull(false, true);
+        sbStartAutoPull();
+        // ao logar: puxar automaticamente
+        sbSyncPull(false, true).then(function(){ if(window.__SYNC_GUARD) window.__SYNC_GUARD.pulledAfterLogin = true; });
+        sbStartAutoPull();
       }else{
         sbSetStatus('desconectado');
         sbStopAutoPull();
@@ -1997,12 +1996,25 @@ async function sbSyncPull(showAlerts=true, silent=false){
     }
 
 
-    db = novo;
-    localStorage.setItem('mrevenda', JSON.stringify(db));
-    atualizarBadgeFiado();
-    renderDashboard();
-    if(showAlerts && !silent) alert('Dados carregados do online.');
-    return true;
+    
+db = novo;
+localStorage.setItem('mrevenda', JSON.stringify(db));
+
+// marcou como sincronizado neste login (libera push)
+if(window.__SYNC_GUARD) window.__SYNC_GUARD.pulledAfterLogin = true;
+
+// re-render geral (evita "puxou mas não apareceu")
+atualizarBadgeFiado();
+renderDashboard();
+try{ renderProdutos(); }catch(e){}
+try{ renderProdutosVenda(); }catch(e){}
+try{ renderHistorico(); }catch(e){}
+try{ renderCompras(); }catch(e){}
+try{ renderRelatorios(); }catch(e){}
+try{ renderFiado(); }catch(e){}
+try{ atualizarCarrinho(); }catch(e){}
+if(showAlerts && !silent) alert('Dados carregados do online.');
+return true;
   }catch(e){
     console.error(e);
     if(showAlerts) alert('Falha ao puxar do online: ' + (e && e.message ? e.message : e));
@@ -2012,12 +2024,6 @@ async function sbSyncPull(showAlerts=true, silent=false){
 
 // Envia para o online (upsert)
 async function sbSyncPush(showAlerts=true){
-
-  // bloqueia push se nunca fez pull após login
-  if(!window.__SYNC_GUARD.pulledAfterLogin){
-    alert("Este dispositivo ainda não sincronizou com o online. Faça o pull primeiro.");
-    return;
-  }
   try{
     if(!window.__SB.client){ sbInit(); }
     if(!window.__SB.userId){
@@ -2054,12 +2060,6 @@ window.sbLogout = sbLogout;
 window.sbSyncPull = sbSyncPull;
 window.sbSyncPush = sbSyncPush;
 
-
-
-// ─── SYNC GUARD ─────────────────────────────────────────────
-window.__SYNC_GUARD = {
-  pulledAfterLogin: false
-};
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 
