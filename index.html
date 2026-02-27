@@ -2436,6 +2436,22 @@ function sbStartRealtime(){
     sbLog('Realtime indisponível (ok).', 'warn');
   }
 }
+
+/* ─── SDK LOADER (fallback) ───────────────────────────────────────────── */
+function ensureSupabaseSDK(){
+  return new Promise(function(resolve){
+    try{
+      if(window.supabase && window.supabase.createClient){ return resolve(true); }
+      // tenta carregar via CDN alternativo (unpkg) caso jsdelivr esteja bloqueado
+      var s=document.createElement('script');
+      s.src='https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+      s.onload=function(){ resolve(!!(window.supabase && window.supabase.createClient)); };
+      s.onerror=function(){ resolve(false); };
+      document.head.appendChild(s);
+    }catch(e){ resolve(false); }
+  });
+}
+
 // ─── SUPABASE ONLINE SYNC ──────────────────────────────────────────────────
 // Preencha as constantes abaixo com os dados do seu projeto Supabase:
 var SUPABASE_URL = "https://bnsdsipilwcoipaqavfv.supabase.co";      // ex: https://xxxx.supabase.co
@@ -2479,7 +2495,7 @@ async function sbAutoPullTick(){
   await sbSyncPull(false, true);
 }
 
-function sbInit(){
+async function sbInit(){
   try{
     if(!window.__SB){
       window.__SB = { client:null,userId:null,email:null,saveTimer:null,lastLocalChangeAt:0,lastRemoteUpdatedAt:0,autoPullTimer:null };
@@ -2488,8 +2504,9 @@ function sbInit(){
     if(!SUPABASE_URL || SUPABASE_URL.indexOf('COLE_AQUI')>=0) { sbSetStatus('config pendente'); return; }
     if(!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.indexOf('COLE_AQUI')>=0) { sbSetStatus('config pendente'); return; }
 
+    var okSDK = await ensureSupabaseSDK();
     var createClient = (window.supabase && window.supabase.createClient) ? window.supabase.createClient : null;
-    if(!createClient){ sbSetStatus('SDK não carregou'); return; }
+    if(!okSDK || !createClient){ sbSetStatus('SDK não carregou'); return; }
 
     window.__SB.client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -2554,7 +2571,7 @@ async function sbLogin(){
         await new Promise(function(r){ setTimeout(r, 100); });
       }
     }
-    if(!window.__SB.client){ alert('SDK do Supabase não carregou ou config pendente.'); return; }
+    if(!window.__SB.client){ alert('Falha no login: SDK do Supabase não carregou (CDN bloqueada?) ou configuração inválida.\n\nDica: teste em outra rede/navegador.'); return; }
 // debug UI
 var __showDebug = (location.search||'').indexOf('debug=1')>=0;
 try{ var dbg=document.getElementById('sb-debug'); if(dbg) dbg.style.display = __showDebug ? 'block' : 'none'; }catch(e){}
@@ -2771,7 +2788,7 @@ setupTabelaProdutosListeners();
 <script>
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register('./service-worker-v5.js');
+      navigator.serviceWorker.register('./service-worker-v6.js');
     });
   }
 </script>
