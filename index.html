@@ -1483,7 +1483,11 @@ function confirmarPagamentoFiado(){
   if(!data){alert('Informe a data do pagamento.');return;}
   var v=db.vendas[idx];if(!v)return;
   v.fiadoPago=true;v.fiadoPagoData=new Date(data+'T12:00:00').toISOString();v.fiadoPagoObs=obs;
-  save();closeModal('modal-pagar-fiado');atualizarBadgeFiado();renderFiado();
+  save();
+  closeModal('modal-pagar-fiado');
+  atualizarBadgeFiado();
+  renderFiado();
+  renderHistorico();
 }
 function atualizarBadgeFiado(){
   var qtd=db.vendas.filter(function(v){return v.pgto==='fiado'&&!v.fiadoPago;}).length;
@@ -1497,9 +1501,10 @@ function renderHistorico(){
   var lista=db.vendas.slice().reverse();
   if(!lista.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Nenhuma venda realizada.</td></tr>';return;}
   tbody.innerHTML=lista.map(function(v){
-    var pgtoLabel=v.pgto==='fiado'
-      ?'<span class="badge badge-fiado">📋 Fiado'+(v.fiadoPago?' (pago)':'')+'</span>'
-      :'<span class="badge badge-pago">✅ Pago</span>';
+    var pgtoLabel =
+    (v.pgto === 'fiado' && !v.fiadoPago)
+      ? '<span class="badge badge-fiado">📋 Fiado</span>'
+      : '<span class="badge badge-pago">✅ Pago</span>';
     return '<tr>'
       +'<td>'+fmtData(v.data)+'</td>'
       +'<td>'+esc(v.cliente)+'</td>'
