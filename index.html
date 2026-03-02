@@ -527,6 +527,17 @@ label{
 #page-relatorios .filter-bar label{
   font-weight: 900;
 }
+  e.stopPropagation();
+
+  var kind = btn.getAttribute('data-del');
+  if(kind === 'entrada'){
+    excluirMovEntrada(btn.getAttribute('data-idx'));
+  }else if(kind === 'baixa'){
+    excluirMovBaixa(btn.getAttribute('data-idx'));
+  }else if(kind === 'venda'){
+    excluirVenda(btn.getAttribute('data-id'));
+  }
+}, true);
 
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -1723,6 +1734,30 @@ document.addEventListener("DOMContentLoaded", function(){
 }
 </style>
 
+
+<style>
+/* ─── BOTÃO ÍCONE (excluir) ───────────────────────────────────────── */
+.btn-icon-del{
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(239,68,68,.30) !important;
+  background: rgba(239,68,68,.08) !important;
+  color: #991b1b !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+}
+.btn-icon-del:hover{
+  background: rgba(239,68,68,.14) !important;
+  border-color: rgba(239,68,68,.45) !important;
+}
+</style>
+
 </head>
 <body>
 
@@ -1903,16 +1938,21 @@ document.addEventListener("DOMContentLoaded", function(){
     <div id="hist-vendas">
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Data</th><th>Cliente</th><th>Itens</th><th>Pagamento</th><th>Total</th></tr></thead>
+          <thead><tr><th>Data</th><th>Cliente</th><th>Itens</th><th>Pagamento</th><th>Total</th><th style='width:80px'>Ações</th></tr></thead>
           <tbody id="tabela-historico"></tbody>
         </table>
       </div>
     </div>
 
     <div id="hist-compras" style="display:none">
+
+<div style="display:flex;justify-content:flex-end;margin:10px 0 12px">
+  <button type="button" class="btn btn-outline" onclick="abrirCompraGeral()">➕ Nova compra</button>
+</div>
+
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Data</th><th>Produto</th><th>Categoria</th><th>Fornecedor</th><th>Qtd</th><th>Custo unit.</th><th>Total</th><th>Obs</th></tr></thead>
+          <thead><tr><th>Data</th><th>Produto</th><th>Categoria</th><th>Fornecedor</th><th>Qtd</th><th>Custo unit.</th><th>Total</th><th>Obs</th><th style="width:60px"></th></tr></thead>
           <tbody id="tabela-compras"></tbody>
         </table>
       </div>
@@ -1921,7 +1961,7 @@ document.addEventListener("DOMContentLoaded", function(){
 <div id="hist-baixas" style="display:none">
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Data</th><th>Produto</th><th>Qtd</th><th>Motivo</th></tr></thead>
+      <thead><tr><th>Data</th><th>Produto</th><th>Qtd</th><th>Motivo</th><th style="width:60px"></th></tr></thead>
       <tbody id="tabela-baixas"></tbody>
     </table>
   </div>
@@ -2037,7 +2077,7 @@ document.addEventListener("DOMContentLoaded", function(){
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th colspan="4">Produtos vendidos no dia</th></tr>
+              <tr><th colspan="5">Produtos vendidos no dia</th></tr>
               <tr><th>Produto</th><th>Qtd</th><th>Receita</th><th>Lucro</th></tr>
             </thead>
             <tbody id="rel-dia-produtos"></tbody>
@@ -2047,7 +2087,7 @@ document.addEventListener("DOMContentLoaded", function(){
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th colspan="4">Clientes do dia</th></tr>
+              <tr><th colspan="5">Clientes do dia</th></tr>
               <tr><th>Cliente</th><th>Comprado</th><th>Pago</th><th>Lucro</th></tr>
             </thead>
             <tbody id="rel-dia-clientes"></tbody>
@@ -2201,7 +2241,13 @@ document.addEventListener("DOMContentLoaded", function(){
   <div class="modal">
     <div class="modal-title">Registrar Compra / Reposição</div>
     <input type="hidden" id="compra-prod-idx">
-    <div class="form-group"><label>Produto</label><input type="text" id="compra-prod-nome" disabled></div>
+    
+<div class="form-group">
+  <label>Produto</label>
+  <input type="text" id="compra-prod-nome" disabled>
+  <select id="compra-prod-select" style="display:none;margin-top:8px"></select>
+</div>
+
     <div class="form-row">
       <div class="form-group"><label>Quantidade</label><input type="number" id="compra-qtd" placeholder="0" min="1" value="1"></div>
       <div class="form-group"><label>Custo unitário (R$)</label><input type="number" id="compra-custo" placeholder="0,00" step="0.01" min="0"></div>
@@ -2233,6 +2279,17 @@ var historicoTab = 'vendas';
   db.produtos = db.produtos || [];
   db.vendas = db.vendas || [];
   db.movimentacoes = db.movimentacoes || [];
+
+  // se vier de versões antigas com objetos, converte para array
+  if(!Array.isArray(db.produtos)){
+    db.produtos = Object.values(db.produtos||{});
+  }
+  if(!Array.isArray(db.vendas)){
+    db.vendas = Object.values(db.vendas||{});
+  }
+  if(!Array.isArray(db.movimentacoes)){
+    db.movimentacoes = Object.values(db.movimentacoes||{});
+  }
 
   // garantir campos de produto
   db.produtos.forEach(function(p){
@@ -2400,11 +2457,65 @@ function abrirCompra(idx){
   document.getElementById('compra-fornecedor').value=(p.fornecedor||'');
   document.getElementById('compra-data').value=(new Date()).toISOString().slice(0,10);
   document.getElementById('compra-obs').value='';
+  document.getElementById('compra-prod-select').style.display='none';
+  document.getElementById('compra-prod-nome').style.display='block';
+  openModal('modal-compra');
+}
+function abrirCompraGeral(){
+  // modo "nova compra" (seleciona produto)
+  var produtos = Array.isArray(db.produtos) ? db.produtos : Object.values(db.produtos||{});
+  if(!produtos.length){
+    alert('Cadastre pelo menos 1 produto antes de registrar uma compra.');
+    return;
+  }
+
+  var sel = document.getElementById('compra-prod-select');
+  sel.innerHTML = produtos
+    .map(function(p,i){ return (p && !p.excluido) ? '<option value="'+i+'">'+esc(p.nome)+'</option>' : ''; })
+    .filter(Boolean)
+    .join('');
+
+  if(!sel.innerHTML){
+    alert('Não há produtos ativos para comprar (todos estão excluídos).');
+    return;
+  }
+
+  sel.style.display = 'block';
+  document.getElementById('compra-prod-nome').style.display = 'none';
+
+  // define produto padrão (primeiro da lista)
+  var idx = parseInt(sel.value||'0',10);
+  document.getElementById('compra-prod-idx').value = String(idx);
+  var p = produtos[idx] || {};
+
+  document.getElementById('compra-qtd').value = 1;
+  document.getElementById('compra-custo').value = (p.custo||0);
+  document.getElementById('compra-fornecedor').value = (p.fornecedor||'');
+  document.getElementById('compra-data').value = (new Date()).toISOString().slice(0,10);
+  document.getElementById('compra-obs').value = '';
   openModal('modal-compra');
 }
 
+// quando trocar o select, atualiza campos padrão
+document.addEventListener('change', function(e){
+  if(e.target && e.target.id === 'compra-prod-select'){
+    var idx = parseInt(e.target.value||'-1',10);
+    if(isNaN(idx) || idx<0) return;
+    document.getElementById('compra-prod-idx').value = String(idx);
+    var produtos = Array.isArray(db.produtos) ? db.produtos : Object.values(db.produtos||{});
+    var p = produtos[idx] || {};
+    document.getElementById('compra-custo').value = (p.custo||0);
+    document.getElementById('compra-fornecedor').value = (p.fornecedor||'');
+  }
+});
+
+
 function salvarCompra(){
   var idx=parseInt(document.getElementById('compra-prod-idx').value||'-1',10);
+  if(isNaN(idx) || idx<0){
+    var sel=document.getElementById('compra-prod-select');
+    if(sel && sel.style.display!=='none') idx=parseInt(sel.value||'-1',10);
+  }
   var p=db.produtos[idx]; if(!p || p.excluido) return;
   var qtd=parseInt(document.getElementById('compra-qtd').value||'0',10);
   var custo=parseFloat(document.getElementById('compra-custo').value)||0;
@@ -2421,7 +2532,7 @@ function salvarCompra(){
   p.custo = custo;
   if(forn) p.fornecedor = forn;
 
-  db.movimentacoes.push({data:iso,produtoIdx:idx,tipo:'entrada',qtd:qtd,qtdRestante:qtd,custoUnit:custo,fornecedor:(forn||p.fornecedor||''),obs:(obs||'Compra')});
+  db.movimentacoes.push({data:iso,produtoIdx:idx,tipo:'entrada',qtd:qtd, qtdRestante:qtd,qtdRestante:qtd,custoUnit:custo,fornecedor:(forn||p.fornecedor||''),obs:(obs||'Compra')});
   save(); closeModal('modal-compra');
   renderProdutos(); if(document.getElementById('venda-data')) document.getElementById('venda-data').value=(new Date()).toISOString().slice(0,10);
   renderProdutosVenda(); renderDashboard(); renderRelatorios(); renderCompras();
@@ -2664,6 +2775,23 @@ function baixarEstoqueUso(idx, qtd, dataISO, obs){
 
 
 
+
+function fifoValorEstoque(prodIdx){
+  // Soma o valor dos lotes ainda disponíveis (qtdRestante) usando o custo da compra (custoUnit)
+  var totalQtd = 0;
+  var totalVal = 0;
+  (db.movimentacoes||[]).forEach(function(m){
+    if(!m || m.tipo!=='entrada' || m.produtoIdx!=prodIdx) return;
+    var r = Number(m.qtdRestante==null ? m.qtd : m.qtdRestante);
+    if(r<=0) return;
+    var cu = Number(m.custoUnit||0);
+    totalQtd += r;
+    totalVal += r * cu;
+  });
+  var custoMedio = totalQtd>0 ? (totalVal/totalQtd) : 0;
+  return {qtd: totalQtd, valor: totalVal, custoMedio: custoMedio};
+}
+
 function renderProdutos(){
   var busca=(document.getElementById('busca-produto')?document.getElementById('busca-produto').value:'').toLowerCase();
   var tbody=document.getElementById('tabela-produtos');
@@ -2842,6 +2970,7 @@ function renderCompras(){
     .filter(function(m){return m && m.tipo==='entrada';})
     .sort(function(a,b){return new Date(b.data)-new Date(a.data);});
   tbody.innerHTML = mov.map(function(m){
+    var midx = db.movimentacoes.indexOf(m);
     var p=db.produtos[m.produtoIdx];
     if(!p || p.excluido) return '';
     var total = Number(m.qtd||0)*Number(m.custoUnit||0);
@@ -2854,6 +2983,7 @@ function renderCompras(){
       +'<td>'+fmt(Number(m.custoUnit||0))+'</td>'
       +'<td>'+fmt(total)+'</td>'
       +'<td>'+esc(m.obs||'')+'</td>'
+      +'<td style="text-align:right"><button type="button" class="btn-icon-del js-del" title="Excluir" data-del="entrada" data-idx="'+midx+'">🗑️</button></td>'
       +'</tr>';
   }).join('');
 }
@@ -2867,19 +2997,23 @@ function renderBaixas(){
     .sort(function(a,b){return new Date(b.data)-new Date(a.data);});
 
   if(!mov.length){
-    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:32px">Nenhuma baixa registrada.</td></tr>';
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Nenhuma baixa registrada.</td></tr>';
     return;
   }
 
   tbody.innerHTML = mov.map(function(m){
+    var midx = db.movimentacoes.indexOf(m);
     var p=db.produtos[m.produtoIdx];
     var nome = p && !p.excluido ? p.nome : ('(produto removido #' + m.produtoIdx + ')');
-    var motivo = String(m.obs||'').replace(/^Uso\/Perda:\s*/,'').replace(/^Uso\/Perda\s*\(sem venda\)/,'Uso/Perda');
+    var motivo = String(m.obs||'')
+      .replace(/^Uso\/Perda:\s*/,'')
+      .replace(/^Uso\/Perda\s*\(sem venda\)/,'Uso/Perda');
     return '<tr>'
       +'<td>'+fmtData(m.data)+'</td>'
       +'<td><strong>'+esc(nome)+'</strong></td>'
       +'<td>'+Number(m.qtd||0)+'</td>'
       +'<td>'+esc(motivo)+'</td>'
+      +'<td style="text-align:right"><button type="button" class="btn-icon-del js-del" title="Excluir" data-del="baixa" data-idx="'+midx+'">🗑️</button></td>'
       +'</tr>';
   }).join('');
 }
@@ -2975,7 +3109,7 @@ function renderHistorico(){
       +'<td style="color:var(--muted);font-size:12px">'+v.itens.map(function(i){return esc(i.nome)+'×'+i.qtd;}).join(', ')+'</td>'
       +'<td>'+pgtoLabel+'</td>'
       +'<td style="font-weight:700;color:var(--accent)">'+fmt(v.total)+'</td>'
-      +'</tr>';
+      +'<td><button type="button" class="btn-icon-del js-del" title="Excluir" data-del="venda" data-id="'+v.id+'">🗑️</button></td></tr>';
   }).join('');
 }
 
@@ -3269,12 +3403,12 @@ function renderRelatoriosDia(){
       +'<td>'+Number(x.qtd||0)+'</td>'
       +'<td>'+fmt(Number(x.receita||0))+'</td>'
       +'<td>'+fmt(Number(x.lucro||0))+'</td>'
-      +'</tr>';
+      +'<td><button type="button" class="btn-icon-del js-del" title="Excluir" data-del="venda" data-id="'+v.id+'">🗑️</button></td></tr>';
   }).join('');
 
   var tbProd = document.getElementById('rel-dia-produtos');
   if(tbProd){
-    tbProd.innerHTML = prodRows || '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:18px">Nenhuma venda neste dia.</td></tr>';
+    tbProd.innerHTML = prodRows || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:18px">Nenhuma venda neste dia.</td></tr>';
   }
 
   // Clientes do dia
@@ -3302,12 +3436,12 @@ function renderRelatoriosDia(){
       +'<td>'+fmt(Number(x.comprado||0))+'</td>'
       +'<td>'+fmt(Number(x.pago||0))+'</td>'
       +'<td>'+fmt(Number(x.lucro||0))+'</td>'
-      +'</tr>';
+      +'<td><button type="button" class="btn-icon-del js-del" title="Excluir" data-del="venda" data-id="'+v.id+'">🗑️</button></td></tr>';
   }).join('');
 
   var tbCli = document.getElementById('rel-dia-clientes');
   if(tbCli){
-    tbCli.innerHTML = cliRows || '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:18px">Nenhum cliente neste dia.</td></tr>';
+    tbCli.innerHTML = cliRows || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:18px">Nenhum cliente neste dia.</td></tr>';
   }
 }
 
@@ -3757,6 +3891,112 @@ setupTabelaProdutosListeners();
       navigator.serviceWorker.register('./service-worker-v4.js');
     });
   }
+
+
+document.addEventListener('click', function(e){
+  var btn = e.target && e.target.closest ? e.target.closest('button.js-del') : null;
+  if(!btn) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  var kind = btn.getAttribute('data-del');
+  if(kind === 'entrada'){
+    excluirMovEntrada(btn.getAttribute('data-idx'));
+  }else if(kind === 'baixa'){
+    excluirMovBaixa(btn.getAttribute('data-idx'));
+  }else if(kind === 'venda'){
+    excluirVenda(btn.getAttribute('data-id'));
+  }
+}, true);
+
+
+/* ─────────────────────────────────────────────────────────────
+   EXCLUSÕES (Histórico): Vendas, Compras (Entrada), Baixas
+   ───────────────────────────────────────────────────────────── */
+function excluirVenda(vendaId){
+  if(!confirm('Excluir esta venda?')) return;
+  var idx = (db.vendas||[]).findIndex(function(v){ return v.id==vendaId; });
+  if(idx < 0) return;
+  var venda = db.vendas[idx];
+
+  (venda.itens||[]).forEach(function(item){
+    var p = db.produtos[item.idx];
+    if(p && !p.excluido){
+      p.estoque = Number(p.estoque||0) + Number(item.qtd||0);
+    }
+  });
+
+  db.movimentacoes = (db.movimentacoes||[]).filter(function(m){
+    if(!m || m.tipo!=='saida') return true;
+    if(String(m.obs||'').indexOf('Venda')!==0) return true;
+    if(String(m.data||'') !== String(venda.data||'')) return true;
+    if(String(m.obs||'').indexOf(' p/ '+String(venda.cliente||''))===-1) return true;
+    return false;
+  });
+
+  db.vendas.splice(idx,1);
+  save();
+
+  renderHistorico();
+  renderCompras();
+  renderBaixas();
+  renderProdutos();
+  renderProdutosVenda();
+  renderDashboard();
+  renderRelatorios();
+  if(typeof atualizarBadgeFiado === 'function') atualizarBadgeFiado();
+}
+
+function excluirMovEntrada(midx){
+  if(!confirm('Excluir esta compra?')) return;
+  midx = parseInt(midx,10);
+  if(isNaN(midx) || midx<0 || midx>= (db.movimentacoes||[]).length) return;
+
+  var mov = db.movimentacoes[midx];
+  if(!mov || mov.tipo!=='entrada'){ alert('Movimentação inválida.'); return; }
+
+  var p = db.produtos[mov.produtoIdx];
+  if(p && !p.excluido){
+    p.estoque = Math.max(0, Number(p.estoque||0) - Number(mov.qtd||0));
+  }
+
+  db.movimentacoes.splice(midx,1);
+  save();
+
+  renderCompras();
+  renderProdutos();
+  renderProdutosVenda();
+  renderDashboard();
+  renderRelatorios();
+}
+
+function excluirMovBaixa(midx){
+  if(!confirm('Excluir esta baixa?')) return;
+  midx = parseInt(midx,10);
+  if(isNaN(midx) || midx<0 || midx>= (db.movimentacoes||[]).length) return;
+
+  var mov = db.movimentacoes[midx];
+  if(!mov || mov.tipo!=='saida' || String(mov.obs||'').indexOf('Uso/Perda')!==0){
+    alert('Movimentação inválida.');
+    return;
+  }
+
+  var p = db.produtos[mov.produtoIdx];
+  if(p && !p.excluido){
+    p.estoque = Number(p.estoque||0) + Number(mov.qtd||0);
+  }
+
+  db.movimentacoes.splice(midx,1);
+  save();
+
+  renderBaixas();
+  renderProdutos();
+  renderProdutosVenda();
+  renderDashboard();
+  renderRelatorios();
+}
+
 </script>
 
 </body>
