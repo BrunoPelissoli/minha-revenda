@@ -100,7 +100,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
 .prod-card-stock{font-size:11px;color:var(--muted);margin-top:4px}
 .search-bar{display:flex;gap:10px;margin-bottom:16px}
 .search-bar input{flex:1}
-.pgto-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pgto-toggle{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .pgto-opt{border:2px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all .2s;font-weight:600;font-size:14px}
 .pgto-opt:hover{border-color:var(--muted)}
 .pgto-opt.sel-pago{border-color:var(--success);background:rgba(74,222,128,.1);color:var(--success)}
@@ -1605,6 +1605,7 @@ document.addEventListener("DOMContentLoaded", function(){
     "Produtos": "📦",
     "Catálogo": "🛒",
     "Fiado": "👤",
+    "Em espera": "⏳",
     "Histórico": "📜",
     "Relatórios": "📈",
     "Importar / Exportar": "⬇️"
@@ -1749,6 +1750,117 @@ document.addEventListener("DOMContentLoaded", function(){
 }
 </style>
 
+
+<style>
+/* ─── Layout final Forma de Pagamento ───────────────────────── */
+
+.pgto-toggle{
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px !important;
+  margin-top: 6px;
+}
+
+.pgto-toggle .pgto-opt{
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 16px 10px !important;
+  text-align: center !important;
+}
+
+/* Terceiro card ocupa linha inteira */
+.pgto-toggle .pgto-opt:nth-child(3){
+  grid-column: 1 / -1 !important;
+}
+
+/* Ícones centralizados */
+.pgto-toggle .pgto-opt{
+  font-size: 15px;
+}
+
+.pgto-toggle .pgto-opt::first-line{
+  font-size: 20px;
+}
+</style>
+
+
+<style>
+/* ──────────────────────────────────────────────────────────
+   Pagamento (Premium): cards com relevo, animação e estados
+────────────────────────────────────────────────────────── */
+
+/* container */
+.pgto-toggle{
+  gap: 12px !important;
+}
+
+/* card base */
+.pgto-toggle .pgto-opt{
+  border-radius: 14px !important;
+  border: 1px solid rgba(2,6,23,.16) !important;
+  background: rgba(255,255,255,.92) !important;
+  box-shadow:
+    0 10px 22px rgba(2,6,23,.08),
+    inset 0 1px 0 rgba(255,255,255,.75) !important;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease, color .16s ease !important;
+  user-select: none;
+}
+
+/* “ícone” (primeira linha) */
+.pgto-toggle .pgto-opt{
+  letter-spacing: .2px;
+}
+.pgto-toggle .pgto-opt::first-line{
+  font-size: 22px !important;
+}
+
+/* hover */
+.pgto-toggle .pgto-opt:hover{
+  transform: translateY(-2px);
+  border-color: rgba(37,99,235,.35) !important;
+  box-shadow:
+    0 14px 30px rgba(2,6,23,.12),
+    inset 0 1px 0 rgba(255,255,255,.75) !important;
+}
+
+/* active press */
+.pgto-toggle .pgto-opt:active{
+  transform: translateY(-1px) scale(.99);
+}
+
+/* selecionados (mantém as classes existentes do JS: sel-pago / sel-fiado) */
+.pgto-toggle .pgto-opt.sel-pago{
+  border-color: rgba(22,163,74,.55) !important;
+  background: rgba(22,163,74,.10) !important;
+  box-shadow:
+    0 14px 30px rgba(22,163,74,.14),
+    inset 0 1px 0 rgba(255,255,255,.75) !important;
+}
+
+.pgto-toggle .pgto-opt.sel-fiado{
+  border-color: rgba(239,68,68,.55) !important;
+  background: rgba(239,68,68,.10) !important;
+  box-shadow:
+    0 14px 30px rgba(239,68,68,.14),
+    inset 0 1px 0 rgba(255,255,255,.75) !important;
+}
+
+/* Em espera (3º card) — destaque “neutro” */
+.pgto-toggle .pgto-opt:nth-child(3){
+  border-color: rgba(245,158,11,.45) !important;
+  background: rgba(245,158,11,.10) !important;
+}
+.pgto-toggle .pgto-opt:nth-child(3):hover{
+  border-color: rgba(245,158,11,.65) !important;
+  box-shadow:
+    0 14px 30px rgba(245,158,11,.14),
+    inset 0 1px 0 rgba(255,255,255,.75) !important;
+}
+</style>
+
 </head>
 <body>
 
@@ -1763,6 +1875,13 @@ document.addEventListener("DOMContentLoaded", function(){
     </div>
     <div class="nav-item" id="nav-vendas" onclick="goTo('vendas')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Catálogo
+    </div>
+    <div class="nav-item" id="nav-espera" onclick="goTo('espera')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M12 7v5l3 3"></path>
+      </svg>Em espera
+      <span class="nav-badge" id="espera-badge" style="display:none">0</span>
     </div>
     <div class="nav-item" id="nav-fiado" onclick="goTo('fiado')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Fiado
@@ -1894,6 +2013,7 @@ document.addEventListener("DOMContentLoaded", function(){
               <div class="pgto-toggle">
                 <div class="pgto-opt" id="opt-pago" onclick="selPgto('pago')">✅ Pago</div>
                 <div class="pgto-opt" id="opt-fiado" onclick="selPgto('fiado')">📋 Fiado</div>
+                <div class="pgto-opt" id="opt-espera" onclick="selPgto('espera')">⏳ Em espera</div>
               </div>
               <input type="hidden" id="venda-pgto" value="">
             </div>
@@ -1903,6 +2023,22 @@ document.addEventListener("DOMContentLoaded", function(){
       </div>
     </div>
   </div>
+
+
+  <!-- EM ESPERA -->
+  <div id="page-espera" class="page">
+    <div class="page-header">
+      <div class="page-title">Em espera <small>Vendas aguardando confirmação (Pago ou Fiado)</small></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Data</th><th>Cliente</th><th>Itens</th><th>Total</th><th style="width:260px">Ações</th></tr></thead>
+        <tbody id="tabela-espera"></tbody>
+      </table>
+    </div>
+  </div>
+
 
   <!-- FIADO -->
   <div id="page-fiado" class="page">
@@ -2082,7 +2218,7 @@ document.addEventListener("DOMContentLoaded", function(){
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th colspan="5">Produtos vendidos no dia</th></tr>
+              <tr><th colspan="4">Produtos vendidos no dia</th></tr>
               <tr><th>Produto</th><th>Qtd</th><th>Receita</th><th>Lucro</th></tr>
             </thead>
             <tbody id="rel-dia-produtos"></tbody>
@@ -2092,7 +2228,7 @@ document.addEventListener("DOMContentLoaded", function(){
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th colspan="5">Clientes do dia</th></tr>
+              <tr><th colspan="4">Clientes do dia</th></tr>
               <tr><th>Cliente</th><th>Comprado</th><th>Pago</th><th>Lucro</th></tr>
             </thead>
             <tbody id="rel-dia-clientes"></tbody>
@@ -2443,15 +2579,17 @@ var pgtoHidden = document.getElementById('venda-pgto');
 if(pgtoHidden) pgtoHidden.value = '';
 var opPago = document.getElementById('opt-pago');
 var opFiado = document.getElementById('opt-fiado');
+var opEspera = document.getElementById('opt-espera');
 if(opPago) opPago.className = 'pgto-opt';
 if(opFiado) opFiado.className = 'pgto-opt';
+if(opEspera) opEspera.className = 'pgto-opt';
 
 // Sempre limpar nome do cliente ao abrir "Catálogo"
 var cli = document.getElementById('venda-cliente');
 if(cli) cli.value = '';
 
 renderProdutosVenda();
-renderCarrinho();},fiado:renderFiado,historico:renderHistorico,relatorios:renderRelatorios,dados:renderDados};
+renderCarrinho();},espera:renderEspera,fiado:renderFiado,historico:renderHistorico,relatorios:renderRelatorios,dados:renderDados};
   if(fns[pg]) fns[pg]();
 }
 function abrirCompra(idx){
@@ -2863,7 +3001,10 @@ function selPgto(tipo){
   document.getElementById('venda-pgto').value=tipo;
   document.getElementById('opt-pago').className='pgto-opt'+(tipo==='pago'?' sel-pago':'');
   document.getElementById('opt-fiado').className='pgto-opt'+(tipo==='fiado'?' sel-fiado':'');
+  var opE = document.getElementById('opt-espera');
+  if(opE) opE.className='pgto-opt'+(tipo==='espera'?' sel-espera':'');
 }
+
 
 function renderProdutosVenda(){
   var busca=(document.getElementById('busca-venda')?document.getElementById('busca-venda').value:'').toLowerCase();
@@ -2942,8 +3083,8 @@ function finalizarVenda(){
   if(!nomeCliente){alert('Informe o nome do cliente.');return;}
   var pgto=document.getElementById('venda-pgto').value;
 
-  if(pgto!=='pago' && pgto!=='fiado'){
-    alert('Selecione a forma de pagamento (Pago ou Fiado) para finalizar a venda.');
+  if(pgto!=='pago' && pgto!=='fiado' && pgto!=='espera'){
+    alert('Selecione a forma de pagamento (Pago, Fiado ou Em espera) para finalizar a venda.');
     return;
   }
 
@@ -2975,9 +3116,13 @@ function finalizarVenda(){
   db.vendas.push({id:Date.now(),data:isoVenda,cliente:nomeCliente,pgto:pgto,itens:itens,total:total,
     fiadoPago:(pgto==='pago'),fiadoPagoData:(pgto==='pago'?isoVenda:null),fiadoPagoObs:''});
 
-  save();atualizarBadgeFiado();
-  alert(pgto==='fiado'?'📋 Venda no fiado!\n'+nomeCliente+' deve '+fmt(total):'✅ Venda finalizada!\n'+nomeCliente+' pagou '+fmt(total));
-  limparCarrinho(); renderDashboard(); renderHistorico(); renderFiado(); renderRelatorios();
+  save();
+  if(typeof atualizarBadgeFiado==='function') atualizarBadgeFiado();
+  if(typeof atualizarBadgeEspera==='function') atualizarBadgeEspera();
+  alert(pgto==='fiado'?'📋 Venda no fiado!\n'+nomeCliente+' deve '+fmt(total):
+        (pgto==='espera'?'⏳ Venda em espera!\n'+nomeCliente+' aguardando confirmação de pagamento: '+fmt(total):
+         '✅ Venda finalizada!\n'+nomeCliente+' pagou '+fmt(total)));
+  limparCarrinho(); renderDashboard(); renderHistorico(); renderEspera(); renderFiado(); renderRelatorios();
 }
 
 // ─── FIADO ────────────────────────────────────────────────────────────────────
@@ -3230,6 +3375,77 @@ function atualizarBadgeFiado(){
   b.textContent=qtd;b.style.display=qtd>0?'inline-block':'none';
 }
 
+
+function atualizarBadgeEspera(){
+  var qtd = (db.vendas||[]).filter(function(v){ return v && v.pgto==='espera'; }).length;
+  var b = document.getElementById('espera-badge');
+  if(!b) return;
+  b.textContent = qtd;
+  b.style.display = qtd>0 ? 'inline-block' : 'none';
+}
+
+// ─── EM ESPERA ───────────────────────────────────────────────────────────────
+function renderEspera(){
+  var tbody = document.getElementById('tabela-espera');
+  if(!tbody) return;
+
+  var lista = (db.vendas||[]).filter(function(v){ return v && v.pgto==='espera'; })
+    .slice().sort(function(a,b){ return new Date(b.data)-new Date(a.data); });
+
+  if(!lista.length){
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Nenhuma venda em espera.</td></tr>';
+    atualizarBadgeEspera();
+    return;
+  }
+
+  tbody.innerHTML = lista.map(function(v){
+    var itens = (v.itens||[]).map(function(i){ return (i.qtd||0)+'x '+esc(i.nome||''); }).join('<br>');
+    var dt = fmtData(v.data);
+    return '<tr>'
+      +'<td>'+dt+'</td>'
+      +'<td><strong>'+esc(v.cliente||'')+'</strong></td>'
+      +'<td>'+itens+'</td>'
+      +'<td><strong>'+fmt(v.total||0)+'</strong></td>'
+      +'<td style="display:flex;gap:6px;flex-wrap:wrap">'
+        +'<button class="btn btn-sm btn-secondary" onclick="marcarVendaEspera('+v.id+',\'pago\')">Marcar Pago</button>'
+        +'<button class="btn btn-sm btn-secondary" onclick="marcarVendaEspera('+v.id+',\'fiado\')">Marcar Fiado</button>'
+        +'<button class="btn-icon-del" title="Excluir" onclick="excluirVenda('+v.id+')">🗑️</button>'
+      +'</td>'
+    +'</tr>';
+  }).join('');
+
+  atualizarBadgeEspera();
+}
+
+function marcarVendaEspera(vendaId, novoPgto){
+  var v = (db.vendas||[]).find(function(x){ return x && x.id==vendaId; });
+  if(!v) return;
+
+  if(novoPgto!=='pago' && novoPgto!=='fiado') return;
+
+  if(novoPgto==='pago'){
+    v.pgto = 'pago';
+    v.fiadoPago = true;
+    v.fiadoPagoData = new Date().toISOString();
+    v.fiadoPagoObs = 'Marcado como pago (antes estava em espera)';
+  }else{
+    v.pgto = 'fiado';
+    v.fiadoPago = false;
+    v.fiadoPagoData = null;
+    v.fiadoPagoObs = '';
+  }
+
+  save();
+  renderEspera();
+  renderFiado();
+  renderHistorico();
+  renderDashboard();
+  renderRelatorios();
+  if(typeof atualizarBadgeFiado==='function') atualizarBadgeFiado();
+  atualizarBadgeEspera();
+}
+
+
 // ─── HISTÓRICO ────────────────────────────────────────────────────────────────
 function renderHistorico(){
   var tbody=document.getElementById('tabela-historico');
@@ -3474,13 +3690,20 @@ function renderRelatoriosDia(){
   // Se a página/elementos não existirem, sai silenciosamente
   if(!document.getElementById('rel-dia-produtos')) return;
 
-  var dia = getRelDiaValue(); // YYYY-MM-DD
-  var dayStart = new Date(dia + 'T00:00:00');
-  var dayEnd   = new Date(dia + 'T23:59:59');
+  var dia = getRelDiaValue(); // YYYY-MM-DD (input date)
+  // Comparação por data local (evita problemas de fuso ao comparar ISO UTC)
+  function mesmaData(isoOrDateStr, ymd){
+    if(!isoOrDateStr || !ymd) return false;
+    var d = new Date(isoOrDateStr);
+    if(isNaN(d.getTime())) return false;
+    var yyyy = d.getFullYear();
+    var mm = String(d.getMonth()+1).padStart(2,'0');
+    var dd = String(d.getDate()).padStart(2,'0');
+    return (yyyy + '-' + mm + '-' + dd) === ymd;
+  }
 
   var vendasDia = (db.vendas||[]).filter(function(v){
-    var dv = new Date(v.data);
-    return dv >= dayStart && dv <= dayEnd;
+    return v && mesmaData(v.data, dia);
   });
 
   // Totais do dia
@@ -3492,32 +3715,43 @@ function renderRelatoriosDia(){
     return s + (isPago ? Number(v.total||0) : 0);
   }, 0);
 
+  // Lucro estimado do dia (soma lucro dos itens)
   var lucro = vendasDia.reduce(function(s,v){
-    var itens = (v.itens||[]);
+    var itens = v.itens || [];
     var l = itens.reduce(function(ss,i){
-      return ss + (Number(i.preco||0) - Number(i.custo||0)) * Number(i.qtd||0);
+      var qtd = Number(i.qtd||0);
+      var prec = Number(i.preco||0);
+      var custo = Number(i.custo||0);
+      return ss + ((prec - custo) * qtd);
     }, 0);
     return s + l;
   }, 0);
 
-  var label = '';
-  try{
-    label = new Date(dia + 'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-  }catch(e){ label = dia; }
+  // Atualiza métricas
+  var elRec = document.getElementById('rel-dia-receita');
+  if(elRec) elRec.textContent = fmt(receita);
+  var elPago = document.getElementById('rel-dia-pago');
+  if(elPago) elPago.textContent = fmt(pago);
+  var elLuc = document.getElementById('rel-dia-lucro');
+  if(elLuc) elLuc.textContent = fmt(lucro);
 
-  var elLab = document.getElementById('rel-dia-label');
-  if(elLab) elLab.textContent = label;
+  // Label do dia (texto)
+  var lbl = document.getElementById('rel-dia-label');
+  if(lbl){
+    try{
+      var parts = dia.split('-'); // YYYY-MM-DD
+      var dt = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
+      lbl.textContent = dt.toLocaleDateString('pt-BR', {weekday:'long', year:'numeric', month:'long', day:'2-digit'});
+    }catch(e){
+      lbl.textContent = dia;
+    }
+  }
 
-  var elR = document.getElementById('rel-dia-receita'); if(elR) elR.textContent = fmt(receita);
-  var elP = document.getElementById('rel-dia-pago');   if(elP) elP.textContent = fmt(pago);
-  var elL = document.getElementById('rel-dia-lucro');  if(elL) elL.textContent = fmt(lucro);
-
-  // Produtos vendidos no dia
+  // Agregação por produto
   var prodAgg = {};
   vendasDia.forEach(function(v){
     (v.itens||[]).forEach(function(i){
-      var nome = i && i.nome ? i.nome : '';
-      if(!nome) return;
+      var nome = (i && i.nome) ? String(i.nome) : '—';
       if(!prodAgg[nome]) prodAgg[nome] = {qtd:0, receita:0, lucro:0};
       var qtd = Number(i.qtd||0);
       var rec = Number(i.preco||0) * qtd;
@@ -3537,32 +3771,35 @@ function renderRelatoriosDia(){
       +'<td>'+Number(x.qtd||0)+'</td>'
       +'<td>'+fmt(Number(x.receita||0))+'</td>'
       +'<td>'+fmt(Number(x.lucro||0))+'</td>'
-      +'<td><button type="button" class="btn-icon-del js-del" title="Excluir" data-del="venda" data-id="'+v.id+'">🗑️</button></td></tr>';
+      +'</tr>';
   }).join('');
 
   var tbProd = document.getElementById('rel-dia-produtos');
   if(tbProd){
-    tbProd.innerHTML = prodRows || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:18px">Nenhuma venda neste dia.</td></tr>';
+    tbProd.innerHTML = prodRows || '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:18px">Nenhum produto vendido neste dia.</td></tr>';
   }
 
-  // Clientes do dia
+  // Agregação por cliente
   var cliAgg = {};
   vendasDia.forEach(function(v){
-    var cli = (v.cliente||'').trim() || '(sem nome)';
-    if(!cliAgg[cli]) cliAgg[cli] = {comprado:0, pago:0, lucro:0};
-    cliAgg[cli].comprado += Number(v.total||0);
+    var nome = (v && v.cliente) ? String(v.cliente) : '—';
+    if(!cliAgg[nome]) cliAgg[nome] = {comprado:0, pago:0, lucro:0};
+    var total = Number(v.total||0);
+
+    var lucroV = (v.itens||[]).reduce(function(ss,i){
+      var qtd = Number(i.qtd||0);
+      return ss + ((Number(i.preco||0) - Number(i.custo||0)) * qtd);
+    }, 0);
 
     var isPago = (v.pgto==='pago') || (v.pgto==='fiado' && v.fiadoPago);
-    cliAgg[cli].pago += (isPago ? Number(v.total||0) : 0);
 
-    var l = (v.itens||[]).reduce(function(ss,i){
-      return ss + (Number(i.preco||0) - Number(i.custo||0)) * Number(i.qtd||0);
-    }, 0);
-    cliAgg[cli].lucro += l;
+    cliAgg[nome].comprado += total;
+    cliAgg[nome].pago += (isPago ? total : 0);
+    cliAgg[nome].lucro += lucroV;
   });
 
   var cliRows = Object.keys(cliAgg).sort(function(a,b){
-    return cliAgg[b].pago - cliAgg[a].pago;
+    return cliAgg[b].comprado - cliAgg[a].comprado;
   }).map(function(nome){
     var x = cliAgg[nome];
     return '<tr>'
@@ -3570,12 +3807,12 @@ function renderRelatoriosDia(){
       +'<td>'+fmt(Number(x.comprado||0))+'</td>'
       +'<td>'+fmt(Number(x.pago||0))+'</td>'
       +'<td>'+fmt(Number(x.lucro||0))+'</td>'
-      +'<td><button type="button" class="btn-icon-del js-del" title="Excluir" data-del="venda" data-id="'+v.id+'">🗑️</button></td></tr>';
+      +'</tr>';
   }).join('');
 
   var tbCli = document.getElementById('rel-dia-clientes');
   if(tbCli){
-    tbCli.innerHTML = cliRows || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:18px">Nenhum cliente neste dia.</td></tr>';
+    tbCli.innerHTML = cliRows || '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:18px">Nenhum cliente neste dia.</td></tr>';
   }
 }
 
@@ -4131,6 +4368,7 @@ function excluirVenda(vendaId){
   save();
 
   renderHistorico();
+  renderEspera();
   renderCompras();
   renderBaixas();
   renderProdutos();
@@ -4190,6 +4428,10 @@ function excluirMovBaixa(midx){
   renderRelatorios();
 }
 
+
+// inicialização
+try{ atualizarBadgeFiado(); }catch(e){}
+try{ atualizarBadgeEspera(); }catch(e){}
 </script>
 
 </body>
