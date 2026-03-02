@@ -527,17 +527,8 @@ label{
 #page-relatorios .filter-bar label{
   font-weight: 900;
 }
-  e.stopPropagation();
+  
 
-  var kind = btn.getAttribute('data-del');
-  if(kind === 'entrada'){
-    excluirMovEntrada(btn.getAttribute('data-idx'));
-  }else if(kind === 'baixa'){
-    excluirMovBaixa(btn.getAttribute('data-idx'));
-  }else if(kind === 'venda'){
-    excluirVenda(btn.getAttribute('data-id'));
-  }
-}, true);
 
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -1948,6 +1939,20 @@ document.addEventListener("DOMContentLoaded", function(){
 
 <div style="display:flex;justify-content:flex-end;margin:10px 0 12px">
   <button type="button" class="btn btn-outline" onclick="abrirCompraGeral()">➕ Nova compra</button>
+
+</div>
+
+<div class="card" style="margin:0 0 14px;padding:14px 14px 10px">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <div style="font-weight:800">🕒 Fila de compras</div>
+    <div id="fila-compras-resumo" style="color:var(--muted);font-size:12px"></div>
+  </div>
+  <div class="table-wrap" style="margin-top:10px">
+    <table>
+      <thead><tr><th>Data</th><th>Produto</th><th>Estoque atual</th><th>Posição</th><th>Qtd</th><th>Custo unit.</th><th>Total</th><th>Fornecedor</th><th>Obs</th><th style="width:60px"></th></tr></thead>
+      <tbody id="tabela-fila-compras"></tbody>
+    </table>
+  </div>
 </div>
 
       <div class="table-wrap">
@@ -2280,6 +2285,7 @@ var historicoTab = 'vendas';
   db.vendas = db.vendas || [];
   db.movimentacoes = db.movimentacoes || [];
 
+  db.filaCompras = db.filaCompras || {};
   // se vier de versões antigas com objetos, converte para array
   if(!Array.isArray(db.produtos)){
     db.produtos = Object.values(db.produtos||{});
@@ -2527,13 +2533,39 @@ function salvarCompra(){
   if(custo<0){alert('Custo inválido.');return;}
 
   var iso = data ? (new Date(data+'T12:00:00')).toISOString() : new Date().toISOString();
-  p.estoque = (parseInt(p.estoque||0,10) || 0) + qtd;
-  // mantém custo do produto como "último custo" (apenas para facilitar preenchimento)
-  p.custo = custo;
-  if(forn) p.fornecedor = forn;
 
-  db.movimentacoes.push({data:iso,produtoIdx:idx,tipo:'entrada',qtd:qtd, qtdRestante:qtd,qtdRestante:qtd,custoUnit:custo,fornecedor:(forn||p.fornecedor||''),obs:(obs||'Compra')});
+filaComprasEnsure();
+var filaExistente = filaComprasGet(idx);
+var temFila = (filaExistente && filaExistente.length>0);
+
+// Regra: se já existe estoque disponível, a compra entra em fila e só "libera" quando o estoque deste produto zerar.
+// (e se já houver fila pendente, também entra no fim para manter a ordem)
+if(Number(p.estoque||0) > 0 || temFila){
+  filaComprasEnqueue(idx, {
+    dataISO: iso,
+    qtd: qtd,
+    custoUnit: custo,
+    fornecedor: (forn||p.fornecedor||''),
+    obs: (obs||'Compra')
+  });
   save(); closeModal('modal-compra');
+  alert('Compra adicionada à fila. Ela será liberada quando o estoque deste produto zerar.');
+  // se por algum motivo o estoque já estiver 0, tenta liberar imediatamente
+  filaComprasTryLiberar(idx);
+  renderProdutos(); if(document.getElementById('venda-data')) document.getElementById('venda-data').value=(new Date()).toISOString().slice(0,10);
+  renderProdutosVenda(); renderDashboard(); renderRelatorios(); renderCompras();
+  return;
+}
+
+// Se estoque está zerado, aplica imediatamente (vira o "lote atual")
+p.estoque = (parseInt(p.estoque||0,10) || 0) + qtd;
+// mantém custo do produto como "último custo" (apenas para facilitar preenchimento)
+p.custo = custo;
+if(forn) p.fornecedor = forn;
+
+db.movimentacoes.push({data:iso,produtoIdx:idx,tipo:'entrada',qtd:qtd,qtdRestante:qtd,custoUnit:custo,fornecedor:(forn||p.fornecedor||''),obs:(obs||'Compra')});
+save(); closeModal('modal-compra');
+ closeModal('modal-compra');
   renderProdutos(); if(document.getElementById('venda-data')) document.getElementById('venda-data').value=(new Date()).toISOString().slice(0,10);
   renderProdutosVenda(); renderDashboard(); renderRelatorios(); renderCompras();
 }
@@ -2679,6 +2711,7 @@ if(diff !== 0){
     var custoTotalAdj = fifoAdj ? Number(fifoAdj.custoTotal||0) : 0;
     var custoUnitAdj = fifoAdj ? Number(fifoAdj.custoMedio||0) : 0;
     p.estoque = Math.max(0, oldEstoque - saida);
+    filaComprasTryLiberar(idx);
     db.movimentacoes.push({
       data: isoAjuste,
       produtoIdx: idx,
@@ -2752,6 +2785,8 @@ function baixarEstoqueUso(idx, qtd, dataISO, obs){
   // Baixa estoque
   p.estoque -= qtd;
 
+
+  filaComprasTryLiberar(idx);
   // Registra movimentação sem criar venda
   db.movimentacoes.push({
     data: iso,
@@ -2926,7 +2961,7 @@ function finalizarVenda(){
   var itens=carrinho.map(function(c){
     var p=db.produtos[c.idx];
     var fifo = fifoConsumir(c.idx, c.qtd, false);
-    return {idx:c.idx,nome:p.nome,qtd:c.qtd,preco:p.preco,custo:fifo.custoMedio,custoTotal:fifo.custoTotal};
+    return {idx:c.idx,nome:p.nome,qtd:Number(c.qtd||0),preco:Number(p.preco||0),custo:Number(fifo.custoMedio||0),custoTotal:Number(fifo.custoTotal||0)};
   });
 
   var total=itens.reduce(function(s,i){return s+i.preco*i.qtd;},0);
@@ -2934,6 +2969,7 @@ function finalizarVenda(){
   carrinho.forEach(function(c){
     db.produtos[c.idx].estoque-=c.qtd;
     db.movimentacoes.push({data:isoVenda,produtoIdx:c.idx,tipo:'saida',qtd:c.qtd,obs:'Venda ('+pgto+') p/ '+nomeCliente});
+      filaComprasTryLiberar(c.idx);
   });
 
   db.vendas.push({id:Date.now(),data:isoVenda,cliente:nomeCliente,pgto:pgto,itens:itens,total:total,
@@ -2963,7 +2999,108 @@ function switchHistoricoTab(tab){
 }
 
 
+
+function filaComprasListar(){
+  filaComprasEnsure();
+  var itens = [];
+  Object.keys(db.filaCompras||{}).forEach(function(k){
+    var prodIdx = parseInt(k,10);
+    if(isNaN(prodIdx)) return;
+    var fila = filaComprasGet(prodIdx);
+    (fila||[]).forEach(function(c,fi){
+      itens.push({
+        prodIdx: prodIdx,
+        filaIdx: fi,
+        dataISO: c && c.dataISO ? c.dataISO : '',
+        qtd: Number(c && c.qtd || 0),
+        custoUnit: Number(c && c.custoUnit || 0),
+        fornecedor: (c && c.fornecedor) ? c.fornecedor : '',
+        obs: (c && c.obs) ? c.obs : ''
+      });
+    });
+  });
+  return itens;
+}
+
+function renderFilaCompras(){
+  var tbody = document.getElementById('tabela-fila-compras');
+  var resumo = document.getElementById('fila-compras-resumo');
+  if(!tbody) return;
+
+  filaComprasEnsure();
+  var itens = filaComprasListar();
+
+  if(resumo) resumo.textContent = itens.length ? (itens.length + ' item(ns) aguardando') : 'Fila vazia';
+
+  if(!itens.length){
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:18px">Fila vazia.</td></tr>';
+    return;
+  }
+
+  itens.sort(function(a,b){
+    var pa = db.produtos[a.prodIdx] || {};
+    var pb = db.produtos[b.prodIdx] || {};
+    var na = String(pa.nome||'');
+    var nb = String(pb.nome||'');
+    if(na < nb) return -1;
+    if(na > nb) return 1;
+    return new Date(a.dataISO||0) - new Date(b.dataISO||0);
+  });
+
+  tbody.innerHTML = itens.map(function(x){
+    var p = db.produtos[x.prodIdx];
+    var nome = (p && !p.excluido) ? p.nome : ('(produto removido #' + x.prodIdx + ')');
+    var cat  = (p && !p.excluido) ? (p.categoria||'') : '';
+    var est  = (p && !p.excluido) ? Number(p.estoque||0) : 0;
+
+    var data = x.dataISO ? fmtData(x.dataISO) : '';
+    var total = Number(x.qtd||0) * Number(x.custoUnit||0);
+    var forn = x.fornecedor || ((p && !p.excluido) ? (p.fornecedor||'') : '');
+    var obs  = x.obs || '';
+
+    return '<tr>'
+      +'<td>'+esc(data)+'</td>'
+      +'<td><strong>'+esc(nome)+'</strong><div style="color:var(--muted);font-size:12px">'+esc(cat)+'</div></td>'
+      +'<td>'+Number(est)+'</td>'
+      +'<td>#'+(Number(x.filaIdx||0)+1)+'</td>'
+      +'<td>'+Number(x.qtd||0)+'</td>'
+      +'<td>'+fmt(Number(x.custoUnit||0))+'</td>'
+      +'<td>'+fmt(Number(total||0))+'</td>'
+      +'<td>'+esc(forn)+'</td>'
+      +'<td>'+esc(obs)+'</td>'
+      +'<td style="text-align:right"><button type="button" class="btn-icon-del js-del" title="Remover da fila" data-del="fila" data-prodidx="'+x.prodIdx+'" data-filaidx="'+x.filaIdx+'">🗑️</button></td>'
+      +'</tr>';
+  }).join('');
+}
+
+function excluirFilaCompra(prodIdx, filaIdx){
+  filaComprasEnsure();
+  prodIdx = parseInt(prodIdx,10);
+  filaIdx = parseInt(filaIdx,10);
+  if(isNaN(prodIdx) || isNaN(filaIdx)) return;
+
+  var fila = filaComprasGet(prodIdx);
+  if(!fila || filaIdx<0 || filaIdx>=fila.length) return;
+
+  var p = db.produtos && db.produtos[prodIdx];
+  var nome = (p && !p.excluido) ? p.nome : ('produto #' + prodIdx);
+
+  if(!confirm('Remover esta compra da fila de "' + nome + '"?')) return;
+
+  fila.splice(filaIdx, 1);
+  save();
+
+  renderFilaCompras();
+  renderProdutos();
+  if(document.getElementById('venda-data')) document.getElementById('venda-data').value=(new Date()).toISOString().slice(0,10);
+  renderProdutosVenda();
+  renderDashboard();
+  renderRelatorios();
+  renderCompras();
+}
+
 function renderCompras(){
+  renderFilaCompras();
   var tbody=document.getElementById('tabela-compras');
   if(!tbody) return;
   var mov = (db.movimentacoes||[])
@@ -3133,21 +3270,18 @@ var totalBaixas = movSaidaUso.reduce(function(s,m){
   var ct = (m.custoTotal!=null) ? Number(m.custoTotal||0) : (Number(m.custoUnit||0)*Number(m.qtd||0));
   return s + ct;
 },0);
+// Custo do estoque (com base nos lotes FIFO ainda disponíveis: somatório de qtdRestante * custoUnit)
+var custoEstoqueAtual = db.movimentacoes
+  .filter(function(mm){
+    if(!mm || mm.tipo!=='entrada') return false;
+    var p2 = db.produtos[mm.produtoIdx];
+    if(!p2 || p2.excluido) return false;
+    return Number(mm.qtdRestante||0) > 0;
+  })
+  .reduce(function(s, mm){
+    return s + (Number(mm.qtdRestante||0) * Number(mm.custoUnit||0));
+  }, 0);
 
-  // custo do estoque atual: usa o último custo unitário de entrada conhecido por produto
-  var lastCostByIdx={};
-  db.movimentacoes.forEach(function(mm){
-    if(mm.tipo!=='entrada') return;
-    var p2=db.produtos[mm.produtoIdx];
-    if(!p2||p2.excluido) return;
-    var t=Date.parse(mm.data||'')||0;
-    var prev=lastCostByIdx[mm.produtoIdx];
-    if(!prev||t>=prev.t){ lastCostByIdx[mm.produtoIdx]={t:t,c:Number(mm.custoUnit||0)}; }
-  });
-  var custoEstoqueAtual=db.produtos.map(function(p,idx){return {p:p,idx:idx};}).filter(function(x){return x.p && !x.p.excluido;}).reduce(function(s,x){
-    var c=lastCostByIdx[x.idx]?Number(lastCostByIdx[x.idx].c||0):0;
-    return s + (c*Number(x.p.estoque||0));
-  },0);
 
 // Estoque (visão atual)
 var valorEstoqueAtual = db.produtos
@@ -3160,7 +3294,7 @@ if(document.getElementById('dash-estoque-valor')) document.getElementById('dash-
 
   var totalInv = totalCompras - totalBaixas;
   document.getElementById('dash-receita').textContent=fmt(vendas.filter(function(v){return v.pgto==='pago' || (v.pgto==='fiado' && v.fiadoPago);}).reduce(function(s,v){return s+v.total;},0));
-  document.getElementById('dash-lucro').textContent=fmt(vendas.filter(function(v){return v.pgto==='pago' || (v.pgto==='fiado' && v.fiadoPago);}).reduce(function(s,v){return s+v.itens.reduce(function(ss,i){return ss+(i.preco-i.custo)*i.qtd;},0);},0));
+  document.getElementById('dash-lucro').textContent=fmt(vendas.filter(function(v){return v.pgto==='pago' || (v.pgto==='fiado' && v.fiadoPago);}).reduce(function(s,v){return s+v.itens.reduce(function(ss,i){return ss+((Number(i.preco||0)-Number(i.custo||0))*Number(i.qtd||0));},0);},0));
   document.getElementById('dash-investido').textContent=fmt(totalInv);
   document.getElementById('dash-vendas').textContent=vendas.length;
   var totalFiado=db.vendas.filter(function(v){return v.pgto==='fiado'&&!v.fiadoPago;}).reduce(function(s,v){return s+v.total;},0);
@@ -3447,6 +3581,62 @@ function renderRelatoriosDia(){
 
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
+
+function filaComprasEnsure(){
+  if(!db) db = {produtos:[],vendas:[],movimentacoes:[]};
+  if(!db.filaCompras) db.filaCompras = {};
+}
+function filaComprasGet(prodIdx){
+  filaComprasEnsure();
+  var k = String(prodIdx);
+  if(!Array.isArray(db.filaCompras[k])) db.filaCompras[k] = [];
+  return db.filaCompras[k];
+}
+function filaComprasEnqueue(prodIdx, compra){
+  var fila = filaComprasGet(prodIdx);
+  fila.push(compra);
+}
+function filaComprasTryLiberar(prodIdx){
+  filaComprasEnsure();
+  var p = db.produtos && db.produtos[prodIdx];
+  if(!p || p.excluido) return false;
+
+  var estoqueAtual = Number(p.estoque||0);
+  if(estoqueAtual > 0) return false;
+
+  var fila = filaComprasGet(prodIdx);
+  if(!fila.length) return false;
+
+  var c = fila.shift();
+  if(!c) return false;
+
+  var qtd = Number(c.qtd||0);
+  if(!(qtd>0)) return filaComprasTryLiberar(prodIdx);
+
+  var iso = c.dataISO || new Date().toISOString();
+  var custo = Number(c.custoUnit||0);
+  var forn = (c.fornecedor||p.fornecedor||'');
+  var obs = (c.obs||'Compra (fila)') + ' [LIBERADA DA FILA]';
+
+  // aplica como nova entrada (lote) no FIFO
+  p.estoque = Number(p.estoque||0) + qtd;
+  p.custo = custo;
+  if(forn) p.fornecedor = forn;
+
+  db.movimentacoes.push({
+    data: iso,
+    produtoIdx: prodIdx,
+    tipo: 'entrada',
+    qtd: qtd,
+    qtdRestante: qtd,
+    custoUnit: custo,
+    fornecedor: forn,
+    obs: obs
+  });
+
+  return true;
+}
+
 function fifoConsumir(produtoIdx, qtd, silent){
   // Consome entradas (movimentacoes tipo 'entrada') em FIFO, usando campo qtdRestante.
   // Retorna {custoTotal, custoMedio, alocacoes:[{qtd,custoUnit}]}
@@ -3907,6 +4097,8 @@ document.addEventListener('click', function(e){
     excluirMovBaixa(btn.getAttribute('data-idx'));
   }else if(kind === 'venda'){
     excluirVenda(btn.getAttribute('data-id'));
+  }else if(kind === 'fila'){
+    excluirFilaCompra(btn.getAttribute('data-prodidx'), btn.getAttribute('data-filaidx'));
   }
 }, true);
 
@@ -3959,6 +4151,7 @@ function excluirMovEntrada(midx){
   var p = db.produtos[mov.produtoIdx];
   if(p && !p.excluido){
     p.estoque = Math.max(0, Number(p.estoque||0) - Number(mov.qtd||0));
+    filaComprasTryLiberar(mov.produtoIdx);
   }
 
   db.movimentacoes.splice(midx,1);
