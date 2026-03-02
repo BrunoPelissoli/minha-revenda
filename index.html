@@ -17,6 +17,10 @@
   --warn:#f59e0b;
   --ok:#22c55e;
   --border:#18181b;
+  --surface: var(--card);
+  --surface2: #111112;
+  --success: var(--ok);
+  --accent2: var(--accent-2);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-size:16px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
@@ -212,58 +216,6 @@ label{
 }
 
 
-/* PRODUTOS GRANDES (cards de produtos) */
-.prod-card{
-  padding:22px !important;
-  border-radius:16px !important;
-}
-
-.prod-card h3{
-  font-size:20px !important;
-  margin-bottom:10px !important;
-}
-
-.prod-card .prod-preco{
-  font-size:22px !important;
-  font-weight:700 !important;
-}
-
-.prod-card .prod-estoque{
-  font-size:14px !important;
-  margin-top:6px !important;
-}
-
-.prod-grid{
-  gap:18px !important;
-}
-
-
-/* PRODUTOS EXTRA GRANDES (≈ +40%) */
-.prod-card{
-  padding:30px !important;
-  border-radius:20px !important;
-}
-
-.prod-card h3{
-  font-size:28px !important;
-  margin-bottom:14px !important;
-}
-
-.prod-card .prod-preco{
-  font-size:30px !important;
-  font-weight:800 !important;
-}
-
-.prod-card .prod-estoque{
-  font-size:18px !important;
-  margin-top:10px !important;
-}
-
-.prod-grid{
-  gap:28px !important;
-}
-
-
 /* ─────────────────────────────────────────────
    CATALOGO PREMIUM (layout vitrine)
 ───────────────────────────────────────────── */
@@ -369,7 +321,7 @@ label{
 }
 
 
-/* ─── AJUSTE NOVA VENDA (tipografia menor + card mais largo) ───────────── */
+/* ─── AJUSTE catálogo (tipografia menor + card mais largo) ───────────── */
 
 /* deixa o card um pouco mais largo */
 #grade-produtos-venda{
@@ -381,7 +333,7 @@ label{
   padding:28px !important;
 }
 
-/* reduz bastante as fontes apenas na tela de NOVA VENDA */
+/* reduz bastante as fontes apenas na tela de catálogo */
 #grade-produtos-venda .prod-card h3{
   font-size:22px !important;
 }
@@ -401,7 +353,7 @@ label{
 
 
 
-/* ─── NOVA VENDA 3 COLUNAS ───────────────────────────── */
+/* ─── catálogo 3 COLUNAS ───────────────────────────── */
 
 #grade-produtos-venda{
   max-width:1400px !important;
@@ -411,7 +363,7 @@ label{
 @media (min-width: 900px){
   #grade-produtos-venda{
     display:grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-columns: repeat(4, 1fr) !important;
     gap:32px !important;
   }
 }
@@ -448,7 +400,7 @@ label{
 }
 .rel-dia-metrics{
   display:grid;
-  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
   gap:14px;
   margin-top:12px;
 }
@@ -528,7 +480,7 @@ label{
     linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)) !important;
 }
 .rel-dia-metrics{
-  grid-template-columns: repeat(3, minmax(200px, 1fr)) !important;
+  grid-template-columns: repeat(4, minmax(200px, 1fr)) !important;
   gap: 14px !important;
   margin-top: 14px !important;
 }
@@ -678,7 +630,7 @@ label{
 #page-relatorios .rel-day-metrics{
   margin-top: 14px;
   display:grid;
-  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
   gap: 12px;
 }
 #page-relatorios .rel-metric{
@@ -867,6 +819,236 @@ body[data-page="dados"] #page-dados .dados-shell{
   margin-top: 0 !important;
 }
 
+
+/* ─── CARDS MAIS CLAROS (contraste maior com fundo da página) ─────────── */
+.card,
+.table-wrap,
+.chart-area,
+.cart-panel,
+.fiado-card,
+.rel-kpi-card,
+.rel-day,
+.rel-metric{
+  background: #161618 !important;
+  border: 1px solid #2a2a2e !important;
+}
+
+/* leve realce interno para dar sensação de camada */
+.card,
+.rel-kpi-card,
+.rel-day{
+  box-shadow: 0 18px 36px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+
+
+/* ─── CONTRASTE MELHOR (inputs do modal + toggle Pago/Fiado) ───────────── */
+
+/* Inputs dentro dos modais: mais claros e com borda/outline evidentes */
+.modal input,
+.modal select,
+.modal textarea{
+  background: #1e1e22 !important;
+  border: 1px solid #3a3a42 !important;
+  color: #ffffff !important;
+}
+
+.modal input::placeholder,
+.modal textarea::placeholder{
+  color: rgba(255,255,255,.55) !important;
+}
+
+/* Foco bem visível */
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus{
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.30) !important;
+}
+
+/* Labels um pouco mais claros */
+.modal label{
+  color: rgba(255,255,255,.78) !important;
+}
+
+/* Área de detalhes (pagar fiado) também com mais contraste */
+#pagar-fiado-info{
+  background: #1e1e22 !important;
+  border: 1px solid #3a3a42 !important;
+}
+
+/* ─── Toggle Pago/Fiado: visibilidade maior ───────────────────────────── */
+.pgto-opt{
+  border: 2px solid #3a3a42 !important;
+  background: #141416 !important;
+  color: rgba(255,255,255,.78) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.pgto-opt:hover{
+  border-color: rgba(255,255,255,.55) !important;
+  background: #1a1a1e !important;
+}
+
+/* Selecionados: fundo e borda bem marcados */
+.pgto-opt.sel-pago{
+  border-color: rgba(34,197,94,.95) !important;
+  background: rgba(34,197,94,.18) !important;
+  color: #eafff2 !important;
+  box-shadow: 0 0 0 3px rgba(34,197,94,.18) !important;
+}
+
+.pgto-opt.sel-fiado{
+  border-color: rgba(239,68,68,.95) !important;
+  background: rgba(239,68,68,.18) !important;
+  color: #ffecec !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,.18) !important;
+}
+
+/* Quando nada selecionado, deixa a área mais "obrigatória" visualmente */
+#venda-pgto[value=""] ~ .pgto-toggle .pgto-opt{
+  /* não confiável em todos os navegadores por conta do seletor, então mantemos neutro */
+}
+
+
+/* ─── STATUS ESTOQUE BAIXO EM AMARELO ───────────────────────────── */
+
+/* Badge "Baixo" na tabela de Produtos */
+.status-badge.baixo,
+.badge-baixo,
+.status-baixo{
+  background: rgba(234,179,8,.18) !important;   /* amarelo suave */
+  color: #facc15 !important;                   /* amarelo forte */
+  border: 1px solid rgba(234,179,8,.55) !important;
+  box-shadow: 0 0 0 2px rgba(234,179,8,.15) !important;
+}
+
+/* Caso use apenas texto simples "Baixo" dentro de .status */
+.status .baixo{
+  color: #facc15 !important;
+  font-weight: 700;
+}
+
+/* Dashboard – número de estoque baixo */
+#dash-estoque-baixo,
+.kpi-estoque-baixo,
+.dashboard-estoque-baixo{
+  color: #facc15 !important;
+  font-weight: 800 !important;
+}
+
+
+/* ─── DASHBOARD: ÍCONES MAIORES AO LADO DO VALOR ───────────────────── */
+
+/* Container interno do KPI vira linha */
+.kpi-card{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 18px !important;
+}
+
+/* Ícone maior */
+.kpi-card .kpi-icon{
+  font-size: 26px !important;
+  width: 52px !important;
+  height: 52px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+}
+
+/* Bloco de texto ao lado */
+.kpi-card .kpi-content{
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+/* Valor maior e mais destacado */
+.kpi-card .kpi-value{
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+}
+
+/* Label levemente menor */
+.kpi-card .kpi-label{
+  font-size: 13px !important;
+  opacity: .75 !important;
+}
+
+
+/* ─── DASHBOARD: ÍCONES MAIORES AO LADO DO VALOR (classes reais do HTML) ── */
+.cards-grid .card{
+  display: grid !important;
+  grid-template-columns: 56px 1fr !important;
+  grid-template-rows: auto auto !important;
+  column-gap: 16px !important;
+  align-items: center !important;
+}
+
+/* Ícone */
+.cards-grid .card .card-icon{
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  grid-row: 1 / span 2 !important;
+}
+
+.cards-grid .card .card-icon svg{
+  width: 28px !important;
+  height: 28px !important;
+}
+
+/* Valor e label à direita */
+.cards-grid .card .card-value{
+  grid-column: 2 !important;
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  margin: 0 !important;
+}
+
+.cards-grid .card .card-label{
+  grid-column: 2 !important;
+  font-size: 13px !important;
+  opacity: .78 !important;
+  margin-top: 2px !important;
+}
+
+
+/* ─── MENU LATERAL: TEXTO BRANCO E MAIOR ───────────────────────── */
+
+.sidebar a,
+.sidebar .menu-item{
+  color: #ffffff !important;
+  font-size: 15.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: .2px;
+}
+
+/* Item ativo mantém branco */
+.sidebar a.active,
+.sidebar .menu-item.active{
+  color: #ffffff !important;
+}
+
+/* Ícones levemente maiores */
+.sidebar svg{
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Badge do Fiado melhor contraste */
+.sidebar .badge{
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
 </style>
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0b0b0c">
@@ -885,7 +1067,7 @@ body[data-page="dados"] #page-dados .dados-shell{
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Produtos
     </div>
     <div class="nav-item" id="nav-vendas" onclick="goTo('vendas')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Nova Venda
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Catálogo
     </div>
     <div class="nav-item" id="nav-fiado" onclick="goTo('fiado')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Fiado
@@ -990,9 +1172,9 @@ body[data-page="dados"] #page-dados .dados-shell{
     </div>
   </div>
 
-  <!-- NOVA VENDA -->
+  <!-- catálogo -->
   <div id="page-vendas" class="page">
-    <div class="page-header"><div class="page-title">Nova Venda <small>Selecione os produtos</small></div></div>
+    <div class="page-header"><div class="page-title">Catálogo <small>Selecione os produtos</small></div></div>
     <div class="cart-area">
       <div>
         <div class="search-bar"><input type="text" id="busca-venda" placeholder="Buscar produto..." oninput="renderProdutosVenda()"></div>
@@ -1015,10 +1197,10 @@ body[data-page="dados"] #page-dados .dados-shell{
             <div class="form-group">
               <label>Forma de Pagamento</label>
               <div class="pgto-toggle">
-                <div class="pgto-opt sel-pago" id="opt-pago" onclick="selPgto('pago')">✅ Pago</div>
+                <div class="pgto-opt" id="opt-pago" onclick="selPgto('pago')">✅ Pago</div>
                 <div class="pgto-opt" id="opt-fiado" onclick="selPgto('fiado')">📋 Fiado</div>
               </div>
-              <input type="hidden" id="venda-pgto" value="pago">
+              <input type="hidden" id="venda-pgto" value="">
             </div>
             <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="finalizarVenda()">Finalizar Venda</button>
           </div>
@@ -1484,7 +1666,21 @@ function goTo(pg){
   })();
 
 var fns = {dashboard:renderDashboard,produtos:renderProdutos,vendas:function(){if(document.getElementById('venda-data')) document.getElementById('venda-data').value=(new Date()).toISOString().slice(0,10);
-  renderProdutosVenda();renderCarrinho();},fiado:renderFiado,historico:renderHistorico,relatorios:renderRelatorios,dados:renderDados};
+
+// Sempre exigir seleção do pagamento a cada catálogo
+var pgtoHidden = document.getElementById('venda-pgto');
+if(pgtoHidden) pgtoHidden.value = '';
+var opPago = document.getElementById('opt-pago');
+var opFiado = document.getElementById('opt-fiado');
+if(opPago) opPago.className = 'pgto-opt';
+if(opFiado) opFiado.className = 'pgto-opt';
+
+// Sempre limpar nome do cliente ao abrir "Catálogo"
+var cli = document.getElementById('venda-cliente');
+if(cli) cli.value = '';
+
+renderProdutosVenda();
+renderCarrinho();},fiado:renderFiado,historico:renderHistorico,relatorios:renderRelatorios,dados:renderDados};
   if(fns[pg]) fns[pg]();
 }
 function abrirCompra(idx){
@@ -1874,6 +2070,12 @@ function finalizarVenda(){
   var nomeCliente=document.getElementById('venda-cliente').value.trim();
   if(!nomeCliente){alert('Informe o nome do cliente.');return;}
   var pgto=document.getElementById('venda-pgto').value;
+
+  if(pgto!=='pago' && pgto!=='fiado'){
+    alert('Selecione a forma de pagamento (Pago ou Fiado) para finalizar a venda.');
+    return;
+  }
+
   var dataVenda=document.getElementById('venda-data') ? document.getElementById('venda-data').value : '';
   var isoVenda = dataVenda ? (new Date(dataVenda+'T12:00:00')).toISOString() : new Date().toISOString();
 
@@ -2187,7 +2389,9 @@ function renderRelatorios(){
   var topVend = Object.entries(qtdPorProd).sort(function(a,b){ return b[1]-a[1]; })[0];
 
   var el1 = document.getElementById('rel-prod-mais-vendido');
-  if(el1) el1.textContent = topVend ? (topVend[0] + ' (' + topVend[1] + ' un.)') : '—';
+  var el1sub = document.getElementById('rel-prod-mais-vendido-val');
+  if(el1) el1.textContent = topVend ? topVend[0] : '—';
+  if(el1sub) el1sub.textContent = topVend ? (topVend[1] + ' un') : '0 un';
 
   // Produto com mais lucro (lucro total)
   var lucroPorProd = {};
@@ -2203,7 +2407,7 @@ function renderRelatorios(){
   if(el2) el2.textContent = topLuc ? topLuc[0] : '—';
   if(el2v) el2v.textContent = topLuc ? fmt(topLuc[1]) : fmt(0);
 
-  // Cliente que comprou mais itens (qtd total)
+  // Cliente que comprou mais itens (qtd total) — KPI "Cliente que mais comprou"
   var itensPorCliente = {};
   db.vendas.forEach(function(v){
     var cli = (v.cliente||'').trim();
@@ -2213,10 +2417,12 @@ function renderRelatorios(){
   });
   var topCliItens = Object.entries(itensPorCliente).sort(function(a,b){ return b[1]-a[1]; })[0];
 
-  var el3 = document.getElementById('rel-cliente-mais-itens');
-  var el3q = document.getElementById('rel-cliente-mais-itens-qtd');
-  if(el3) el3.textContent = topCliItens ? topCliItens[0] : '—';
-  if(el3q) el3q.textContent = topCliItens ? (topCliItens[1] + ' itens') : '0 itens';
+  // IDs corretos do HTML
+  var elCmc = document.getElementById('rel-cliente-mais-comprou') || document.getElementById('rel-cliente-mais-itens');
+  var elCmcVal = document.getElementById('rel-cliente-mais-comprou-val') || document.getElementById('rel-cliente-mais-itens-qtd');
+  if(elCmc) elCmc.textContent = topCliItens ? topCliItens[0] : '—';
+  if(elCmcVal) elCmcVal.textContent = topCliItens ? (topCliItens[1] + ' un') : '0 un';
+
 
   // Cliente que mais gastou (valor total)
   var gastoPorCliente = {};
@@ -2231,6 +2437,17 @@ function renderRelatorios(){
   var el4v = document.getElementById('rel-cliente-mais-gastou-val');
   if(el4) el4.textContent = topCliGasto ? topCliGasto[0] : '—';
   if(el4v) el4v.textContent = topCliGasto ? fmt(topCliGasto[1]) : fmt(0);
+
+
+
+  // Receita total — soma apenas vendas pagas (pago imediato ou fiado quitado)
+  var receitaTotal = (db.vendas||[]).reduce(function(s,v){
+    var isPago = (v.pgto==='pago') || (v.pgto==='fiado' && v.fiadoPago);
+    return s + (isPago ? Number(v.total||0) : 0);
+  }, 0);
+
+  var elRec = document.getElementById('rel-receita-total');
+  if(elRec) elRec.textContent = fmt(receitaTotal);
 
   // também atualiza a visão diária (se a página estiver aberta)
   try{ renderRelatoriosDia(); }catch(e){}
