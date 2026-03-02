@@ -1049,10 +1049,679 @@ body[data-page="dados"] #page-dados .dados-shell{
   font-weight: 700 !important;
 }
 
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   THEME V2 — CLARO + FUTURISTA (override)
+   Objetivo: leitura fácil, contraste alto, cards claros, acentos neon/gradiente
+   ════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* base */
+  --bg: #f6f8fc;
+  --card: #ffffff;
+  --muted: rgba(15,23,42,.66);
+  --text: #0f172a;
+  --border: rgba(2,6,23,.12);
+
+  /* acentos */
+  --accent: #2563eb;      /* blue */
+  --accent-2: #06b6d4;    /* cyan */
+  --ok: #16a34a;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+
+  /* surfaces compat */
+  --surface: #ffffff;
+  --surface2: #f1f5ff;
+  --success: var(--ok);
+  --accent2: var(--accent-2);
+}
+
+/* fundo com leve gradiente “futurista” */
+body{
+  background:
+    radial-gradient(900px 600px at 15% 10%, rgba(6,182,212,.18), transparent 55%),
+    radial-gradient(900px 600px at 85% 20%, rgba(37,99,235,.16), transparent 55%),
+    radial-gradient(700px 500px at 60% 90%, rgba(99,102,241,.12), transparent 55%),
+    var(--bg) !important;
+  color: var(--text) !important;
+}
+
+/* tipografia e leitura */
+*{ -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+h1,h2,h3{ letter-spacing: .2px; }
+small,.muted{ color: var(--muted) !important; }
+
+/* layout geral */
+.main{
+  background: transparent !important;
+}
+
+/* sidebar clara, com separação forte */
+.sidebar{
+  background: rgba(255,255,255,.72) !important;
+  backdrop-filter: blur(14px);
+  border-right: 1px solid var(--border) !important;
+  box-shadow: 12px 0 30px rgba(2,6,23,.06);
+}
+.sidebar .brand{
+  color: var(--text) !important;
+}
+.sidebar a,
+.sidebar .menu-item{
+  color: rgba(15,23,42,.78) !important;
+  font-size: 15.5px !important;
+  font-weight: 650 !important;
+}
+.sidebar a:hover{
+  background: rgba(37,99,235,.08) !important;
+  color: var(--text) !important;
+}
+.sidebar a.active{
+  background: linear-gradient(90deg, rgba(37,99,235,.18), rgba(6,182,212,.10)) !important;
+  border: 1px solid rgba(37,99,235,.20) !important;
+  color: var(--text) !important;
+}
+.sidebar svg{
+  width: 20px !important;
+  height: 20px !important;
+  stroke: rgba(15,23,42,.78) !important;
+}
+.sidebar a.active svg{
+  stroke: var(--accent) !important;
+}
+
+/* cabeçalho / topos */
+.topbar, .page-head, .dados-head{
+  background: rgba(255,255,255,.70) !important;
+  border: 1px solid var(--border) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* cards claros e “futuristas” */
+.card,
+.table-wrap,
+.chart-area,
+.cart-panel,
+.fiado-card,
+.rel-kpi-card,
+.rel-day,
+.rel-metric,
+.modal .modal-card,
+.modal .card{
+  background: rgba(255,255,255,.92) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow:
+    0 18px 40px rgba(2,6,23,.10),
+    inset 0 1px 0 rgba(255,255,255,.70) !important;
+  color: var(--text) !important;
+}
+
+/* títulos e números em KPI */
+.card-title, .kpi-label, .rel-kpi-label, .card-label{
+  color: rgba(15,23,42,.72) !important;
+}
+.kpi-value, .card-value, .rel-kpi-value{
+  color: var(--text) !important;
+}
+
+/* botões e ações */
+.btn, button, .chip, .pill{
+  border: 1px solid rgba(2,6,23,.14) !important;
+  background: rgba(255,255,255,.92) !important;
+  color: var(--text) !important;
+}
+.btn.primary, .btn-primary{
+  background: linear-gradient(90deg, rgba(37,99,235,1), rgba(6,182,212,1)) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 10px 24px rgba(37,99,235,.25);
+}
+.btn.primary:hover, .btn-primary:hover{
+  filter: brightness(1.05);
+}
+.btn.danger, .btn-danger{
+  background: rgba(239,68,68,.12) !important;
+  border: 1px solid rgba(239,68,68,.35) !important;
+  color: #991b1b !important;
+}
+
+/* inputs (site todo) */
+input, select, textarea{
+  background: rgba(255,255,255,.96) !important;
+  border: 1px solid rgba(2,6,23,.18) !important;
+  color: var(--text) !important;
+}
+input::placeholder, textarea::placeholder{
+  color: rgba(15,23,42,.45) !important;
+}
+input:focus, select:focus, textarea:focus{
+  outline: none !important;
+  border-color: rgba(37,99,235,.65) !important;
+  box-shadow: 0 0 0 4px rgba(37,99,235,.18) !important;
+}
+
+/* tabelas mais legíveis */
+table th{
+  color: rgba(15,23,42,.72) !important;
+}
+table td{
+  color: rgba(15,23,42,.92) !important;
+}
+table tr:hover{
+  background: rgba(37,99,235,.06) !important;
+}
+
+/* badges e status */
+.badge, .status-badge{
+  border-radius: 999px !important;
+  padding: 6px 10px !important;
+  font-weight: 750 !important;
+}
+.status-badge.ok{
+  background: rgba(22,163,74,.12) !important;
+  color: #166534 !important;
+  border: 1px solid rgba(22,163,74,.28) !important;
+}
+.status-badge.baixo,
+.badge-baixo,
+.status-baixo{
+  background: rgba(245,158,11,.16) !important;
+  color: #92400e !important;
+  border: 1px solid rgba(245,158,11,.35) !important;
+  box-shadow: 0 0 0 2px rgba(245,158,11,.12) !important;
+}
+
+/* toggle pago/fiado: mais contrastado no claro */
+.pgto-opt{
+  background: rgba(2,6,23,.04) !important;
+  border: 2px solid rgba(2,6,23,.14) !important;
+  color: rgba(15,23,42,.82) !important;
+}
+.pgto-opt.sel-pago{
+  background: rgba(22,163,74,.16) !important;
+  border-color: rgba(22,163,74,.55) !important;
+  color: #166534 !important;
+}
+.pgto-opt.sel-fiado{
+  background: rgba(239,68,68,.14) !important;
+  border-color: rgba(239,68,68,.55) !important;
+  color: #991b1b !important;
+}
+
+/* modal: vidro claro */
+.modal{
+  background: rgba(2,6,23,.45) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* pequenos refinamentos de espaçamento */
+.card, .rel-kpi-card{ border-radius: 18px !important; }
+.cards-grid{ gap: 16px !important; }
+
+
+/* ─── FIX DESLOCAMENTO RELATÓRIOS ───────────────────────── */
+
+/* Garantir que todas as páginas ocupem largura total */
+.page{
+  width: 100% !important;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Específico para relatórios */
+#page-relatorios{
+  margin-left: 0 !important;
+  transform: none !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+}
+
+/* Garantir que o container principal não empurre conteúdo */
+.main{
+  display: block !important;
+  padding: 24px !important;
+}
+
 </style>
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0b0b0c">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+
+<style>
+/* ─── RELATÓRIOS: ocupar toda a largura ─────────────────────────────── */
+#page-relatorios{
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+#page-relatorios .page-head,
+#page-relatorios .rel-layout{
+  width: 100% !important;
+}
+</style>
+
+
+<style>
+/* ─── RELATÓRIOS: KPIs ocupando toda a largura (sem "coluna vazia") ─── */
+#page-relatorios .rel-kpis{
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+}
+</style>
+
+
+<style>
+/* ─── RELATÓRIOS: Top 3 nos KPIs ───────────────────────────────────── */
+#page-relatorios .rel-kpi-card .kpi-top3{
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+#page-relatorios .rel-kpi-card .kpi-rank{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.03);
+  border-radius: 14px;
+}
+#page-relatorios .rel-kpi-card .kpi-rank-left{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+#page-relatorios .rel-kpi-card .kpi-medal{
+  font-size: 16px;
+  line-height: 1;
+}
+#page-relatorios .rel-kpi-card .kpi-rank-name{
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+#page-relatorios .rel-kpi-card .kpi-rank-val{
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+/* tamanhos: 1º maior, 2º médio, 3º menor */
+#page-relatorios .rel-kpi-card .kpi-rank-1{ padding: 10px 12px; }
+#page-relatorios .rel-kpi-card .kpi-rank-1 .kpi-rank-name{ font-size: 14px; }
+#page-relatorios .rel-kpi-card .kpi-rank-2{ padding: 9px 12px; opacity: .95; }
+#page-relatorios .rel-kpi-card .kpi-rank-2 .kpi-rank-name{ font-size: 13px; }
+#page-relatorios .rel-kpi-card .kpi-rank-3{ padding: 8px 12px; opacity: .9; }
+#page-relatorios .rel-kpi-card .kpi-rank-3 .kpi-rank-name{ font-size: 12px; }
+</style>
+
+
+<style>
+/* ─── RELATÓRIOS: aumentar fonte dos Top 3 ─────────────────────────── */
+#page-relatorios .rel-kpi-card .kpi-rank-1 .kpi-rank-name{
+  font-size: 16px !important;
+}
+#page-relatorios .rel-kpi-card .kpi-rank-2 .kpi-rank-name{
+  font-size: 15px !important;
+}
+#page-relatorios .rel-kpi-card .kpi-rank-3 .kpi-rank-name{
+  font-size: 14px !important;
+}
+
+#page-relatorios .rel-kpi-card .kpi-rank-val{
+  font-size: 14px !important;
+}
+
+#page-relatorios .rel-kpi-card .kpi-medal{
+  font-size: 18px !important;
+}
+</style>
+
+
+<style>
+/* ─── RELATÓRIOS: corrigir contraste dos cards "Vendas do dia" ───────── */
+#page-relatorios .rel-day-metrics .rel-metric{
+  background: #111827 !important;          /* fundo escuro */
+  border: 1px solid #1f2937 !important;
+}
+
+#page-relatorios .rel-day-metrics .m-label{
+  color: #9ca3af !important;               /* cinza claro */
+  font-size: 14px !important;
+}
+
+#page-relatorios .rel-day-metrics .m-value{
+  color: #ffffff !important;               /* branco */
+  font-size: 22px !important;
+  font-weight: 600 !important;
+}
+</style>
+
+
+
+<style>
+/* ─── TÍTULOS: padrão do Relatórios (fundo + ícone + subtítulo separado) ─── */
+
+/* Container do cabeçalho */
+.page-head,
+.page-header{
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  padding: 18px 22px !important;
+  margin-bottom: 24px !important;
+  border-radius: 14px !important;
+  border: 1px solid #d7e3f4 !important;
+  background: #eef5ff !important;  /* azul claro como no Relatórios */
+}
+
+/* Bloco do título (linha 1) */
+.page-title{
+  font-family: 'DM Serif Display', serif !important;
+  font-size: 30px !important;
+  font-weight: 400 !important;
+  color: #0f172a !important;
+  line-height: 1.05 !important;
+  margin: 0 !important;
+  display: block !important;
+}
+
+/* Subtítulo (linha 2) - padrão usado no Relatórios (.page-sub) */
+.page-sub{
+  margin-top: 6px !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 13px !important;
+  color: var(--muted) !important;
+  font-weight: 500 !important;
+}
+
+/* Compatibilidade: páginas que usam <small> dentro de .page-title */
+.page-title small{
+  display: block !important;
+  margin-top: 6px !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 13px !important;
+  color: var(--muted) !important;
+  font-weight: 500 !important;
+  line-height: 1.25 !important;
+}
+</style>
+
+
+
+
+
+<style>
+/* ─── FORÇAR TODOS OS TÍTULOS IGUAIS AO RELATÓRIOS ───────────────── */
+
+/* Container padrão */
+.page-head,
+.page-header{
+  display: block !important;               /* remove layout lateral */
+  padding: 20px 26px !important;
+  margin-bottom: 24px !important;
+  border-radius: 16px !important;
+  border: 1px solid #d7e3f4 !important;
+  background: #eef5ff !important;          /* mesmo fundo do Relatórios */
+}
+
+/* Título */
+.page-title{
+  font-family: 'DM Serif Display', serif !important;
+  font-size: 30px !important;
+  color: #0f172a !important;
+  margin: 0 !important;
+}
+
+/* Subtítulo SEMPRE abaixo */
+.page-sub,
+.page-title small{
+  display: block !important;
+  margin-top: 6px !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 13px !important;
+  color: var(--muted) !important;
+  font-weight: 500 !important;
+}
+
+/* Forçar qualquer texto auxiliar lateral ir para baixo */
+.page-header > div:last-child{
+  margin-top: 6px !important;
+  font-size: 13px !important;
+  color: var(--muted) !important;
+}
+
+/* Ícone padrão antes do título (caso não tenha) */
+
+</style>
+
+
+
+
+
+<style>
+/* ─── TÍTULOS PADRÃO DEFINITIVO ───────────────────────────── */
+
+.page-head,
+.page-header{
+  display:block !important;
+  padding:20px 26px !important;
+  margin-bottom:24px !important;
+  border-radius:16px !important;
+  border:1px solid #d7e3f4 !important;
+  background:#eef5ff !important;
+}
+
+.page-title{
+  font-family:'DM Serif Display', serif !important;
+  font-size:30px !important;
+  color:#0f172a !important;
+  margin:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:12px !important;
+}
+
+.page-title .title-icon{
+  font-size:26px;
+}
+
+.page-sub{
+  margin-top:6px !important;
+  font-family:'DM Sans', sans-serif !important;
+  font-size:13px !important;
+  color:var(--muted) !important;
+  font-weight:500 !important;
+}
+</style>
+
+
+
+
+
+<style>
+/* ─── FIX TAMANHO UNIFORME DOS TÍTULOS ───────────────── */
+
+.page-title{
+  font-family:'DM Serif Display', serif !important;
+  font-size:32px !important;   /* força mesmo tamanho */
+  line-height:1.1 !important;
+  font-weight:400 !important;
+}
+
+/* garante que nenhum título herde tamanho menor */
+.page-title *{
+  font-size:inherit !important;
+}
+</style>
+
+
+<style>
+/* ─── REMOVER SCROLL DA PÁGINA CATÁLOGOS ───────────────── */
+
+#page-catalogos{
+  min-height:auto !important;
+}
+
+#page-catalogos .main,
+#page-catalogos{
+  overflow-y:hidden !important;
+}
+</style>
+
+
+<style>
+/* ─── PADRONIZAÇÃO FINAL: ações do cabeçalho ───────────────────────── */
+.page-actions{
+  margin-top: 12px !important;
+  display: flex !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+.page-title .title-text{
+  display: inline-block;
+}
+</style>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  const iconMap = {
+    "Dashboard": "📊",
+    "Produtos": "📦",
+    "Catálogo": "🛒",
+    "Fiado": "👤",
+    "Histórico": "📜",
+    "Relatórios": "📈",
+    "Importar / Exportar": "⬇️"
+  };
+
+  function stripLeadingEmojiAndSymbols(s){
+    // Remove leading non-letter/number (covers emojis + symbols) and extra spaces
+    return (s || "").replace(/^[^\wÀ-ÿ]+/g, "").trim();
+  }
+
+  function normalizeHeader(head){
+    if(!head) return;
+
+    // Ensure title exists
+    const title = head.querySelector(".page-title");
+    if(!title) return;
+
+    // 1) Move <small> (including dash-date) to a .page-sub below the title
+    let sub = head.querySelector(".page-sub");
+    const small = title.querySelector("small");
+    if(small){
+      if(!sub){
+        sub = document.createElement("div");
+        sub.className = "page-sub";
+        // If it's the dynamic dashboard date, keep the element (so JS updates it)
+        if(small.id === "dash-date"){
+          sub.appendChild(small); // moves it
+        }else{
+          sub.textContent = small.textContent;
+          small.remove();
+        }
+        title.insertAdjacentElement("afterend", sub);
+      }else{
+        // If both exist, just remove small to avoid duplicates (except dash-date)
+        if(small.id !== "dash-date") small.remove();
+        else sub.appendChild(small);
+      }
+    }
+
+    // 2) If header has extra blocks (buttons/filters), move them to .page-actions under subtitle
+    const children = Array.from(head.children).filter(Boolean);
+    const titleContainer = title.parentElement === head ? null : title.parentElement;
+
+    // Determine direct items to move: in .page-header it is typically [titleDiv, actionsDiv/button]
+    // We keep the first block that contains the title; move the rest.
+    let moveCandidates = [];
+    if(head.classList.contains("page-header")){
+      // In page-header, title and actions are direct children
+      moveCandidates = children.filter(el => !el.contains(title) && !el.classList.contains("page-sub"));
+    }else{
+      // In page-head (Relatórios), keep structure; but still gather siblings inside head if needed
+      moveCandidates = children.filter(el => !el.contains(title) && !el.classList.contains("page-sub"));
+    }
+
+    if(moveCandidates.length){
+      let actions = head.querySelector(".page-actions");
+      if(!actions){
+        actions = document.createElement("div");
+        actions.className = "page-actions";
+        // place after subtitle if exists, else after title
+        const anchor = head.querySelector(".page-sub") || title;
+        anchor.insertAdjacentElement("afterend", actions);
+      }
+      moveCandidates.forEach(el => actions.appendChild(el));
+    }
+
+    // 3) Normalize title content and add icon span while preserving structure
+    // Extract text nodes (excluding existing icon/text spans)
+    const existingIcon = title.querySelector(".title-icon");
+    if(existingIcon) existingIcon.remove();
+    const existingTextSpan = title.querySelector(".title-text");
+    if(existingTextSpan) existingTextSpan.remove();
+
+    // Compute clean title text from text nodes only (ignoring any nested elements)
+    let rawText = "";
+    title.childNodes.forEach(node => {
+      if(node.nodeType === 3){ rawText += node.textContent; }
+    });
+    rawText = stripLeadingEmojiAndSymbols(rawText);
+    if(!rawText){
+      // fallback to full text but strip emoji/symbols; avoids empty titles
+      rawText = stripLeadingEmojiAndSymbols(title.textContent);
+    }
+
+    // Remove stray text nodes (keep other elements like nothing expected now)
+    Array.from(title.childNodes).forEach(node => {
+      if(node.nodeType === 3){ node.remove(); }
+    });
+
+    const icon = document.createElement("span");
+    icon.className = "title-icon";
+    icon.textContent = iconMap[rawText] || "📄";
+
+    const txt = document.createElement("span");
+    txt.className = "title-text";
+    txt.textContent = rawText;
+
+    title.prepend(txt);
+    title.prepend(icon);
+  }
+
+  document.querySelectorAll(".page").forEach(page => {
+    const head = page.querySelector(".page-head") || page.querySelector(".page-header");
+    normalizeHeader(head);
+  });
+});
+</script>
+
+
+<style>
+/* ─── CORREÇÃO DEFINITIVA: Histórico igual aos outros ───────────────── */
+#page-historico .page-title{
+  font-family:'DM Serif Display', serif !important;
+  font-size:30px !important;
+  font-weight:400 !important;
+  line-height:1.05 !important;
+  color:#0f172a !important;
+}
+</style>
 
 </head>
 <body>
@@ -1202,7 +1871,7 @@ body[data-page="dados"] #page-dados .dados-shell{
               </div>
               <input type="hidden" id="venda-pgto" value="">
             </div>
-            <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="finalizarVenda()">Finalizar Venda</button>
+            <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="finalizarVenda()">✔️ Finalizar Venda</button>
           </div>
         </div>
       </div>
@@ -1221,7 +1890,10 @@ body[data-page="dados"] #page-dados .dados-shell{
 
   <!-- HISTÓRICO -->
   <div id="page-historico" class="page">
-    <div class="page-header"><div class="page-title">Histórico</div></div>
+    <div class="page-header">
+      <div class="page-title">Histórico</div>
+      <div class="page-sub">Entrada e saída de produtos</div>
+    </div>
     <div class="tabs">
       <div class="tab active" id="tab-hist-vendas" onclick="switchHistoricoTab('vendas')">Vendas</div>
       <div class="tab" id="tab-hist-compras" onclick="switchHistoricoTab('compras')">Compras</div>
@@ -1262,7 +1934,7 @@ body[data-page="dados"] #page-dados .dados-shell{
   <div id="page-relatorios" class="page">
   <div class="page-head">
     <div>
-      <div class="page-title">Relatórios</div>
+      <div class="page-title">📈 Relatórios</div>
       <div class="page-sub">Resumo rápido + detalhe por dia</div>
     </div>
   </div>
@@ -1273,26 +1945,62 @@ body[data-page="dados"] #page-dados .dados-shell{
     <div class="rel-kpis">
             <div class="rel-kpi-card">
         <div class="kpi-label">Cliente que mais comprou</div>
-        <div class="kpi-value" id="rel-cliente-mais-comprou">—</div>
-        <div class="kpi-sub" id="rel-cliente-mais-comprou-val">0 un</div>
+        <div class="kpi-top3" aria-label="Top 3 Cliente que mais comprou">
+          <div class="kpi-rank kpi-rank-1">
+            <div class="kpi-rank-left"><span class="kpi-medal">🥇</span><span class="kpi-rank-name" id="rel-top3-comprou-1-name">—</span></div>
+            <div class="kpi-rank-val" id="rel-top3-comprou-1-val">—</div>
+          </div>
+          <div class="kpi-rank kpi-rank-2">
+            <div class="kpi-rank-left"><span class="kpi-medal">🥈</span><span class="kpi-rank-name" id="rel-top3-comprou-2-name">—</span></div>
+            <div class="kpi-rank-val" id="rel-top3-comprou-2-val">—</div>
+          </div>
+          <div class="kpi-rank kpi-rank-3">
+            <div class="kpi-rank-left"><span class="kpi-medal">🥉</span><span class="kpi-rank-name" id="rel-top3-comprou-3-name">—</span></div>
+            <div class="kpi-rank-val" id="rel-top3-comprou-3-val">—</div>
+          </div>
+        </div>
+
       </div>
 
       <div class="rel-kpi-card">
         <div class="kpi-label">Cliente que mais gastou</div>
-        <div class="kpi-value" id="rel-cliente-mais-gastou">—</div>
-        <div class="kpi-sub" id="rel-cliente-mais-gastou-val">R$ 0,00</div>
+        <div class="kpi-top3" aria-label="Top 3 Cliente que mais gastou">
+          <div class="kpi-rank kpi-rank-1">
+            <div class="kpi-rank-left"><span class="kpi-medal">🥇</span><span class="kpi-rank-name" id="rel-top3-gastou-1-name">—</span></div>
+            <div class="kpi-rank-val" id="rel-top3-gastou-1-val">—</div>
+          </div>
+          <div class="kpi-rank kpi-rank-2">
+            <div class="kpi-rank-left"><span class="kpi-medal">🥈</span><span class="kpi-rank-name" id="rel-top3-gastou-2-name">—</span></div>
+            <div class="kpi-rank-val" id="rel-top3-gastou-2-val">—</div>
+          </div>
+          <div class="kpi-rank kpi-rank-3">
+            <div class="kpi-rank-left"><span class="kpi-medal">🥉</span><span class="kpi-rank-name" id="rel-top3-gastou-3-name">—</span></div>
+            <div class="kpi-rank-val" id="rel-top3-gastou-3-val">—</div>
+          </div>
+        </div>
+
       </div>
 
       <div class="rel-kpi-card">
         <div class="kpi-label">Produto mais vendido</div>
-        <div class="kpi-value" id="rel-prod-mais-vendido">—</div>
-        <div class="kpi-sub" id="rel-prod-mais-vendido-val">0 un</div>
+        <div class="kpi-top3" aria-label="Top 3 Produto mais vendido">
+          <div class="kpi-rank kpi-rank-1">
+            <div class="kpi-rank-left"><span class="kpi-medal">🥇</span><span class="kpi-rank-name" id="rel-top3-prod-1-name">—</span></div>
+            <div class="kpi-rank-val" id="rel-top3-prod-1-val">—</div>
+          </div>
+          <div class="kpi-rank kpi-rank-2">
+            <div class="kpi-rank-left"><span class="kpi-medal">🥈</span><span class="kpi-rank-name" id="rel-top3-prod-2-name">—</span></div>
+            <div class="kpi-rank-val" id="rel-top3-prod-2-val">—</div>
+          </div>
+          <div class="kpi-rank kpi-rank-3">
+            <div class="kpi-rank-left"><span class="kpi-medal">🥉</span><span class="kpi-rank-name" id="rel-top3-prod-3-name">—</span></div>
+            <div class="kpi-rank-val" id="rel-top3-prod-3-val">—</div>
+          </div>
+        </div>
+
       </div>
 
-      <div class="rel-kpi-card">
-        <div class="kpi-label">Receita total</div>
-        <div class="kpi-value" id="rel-receita-total">R$ 0,00</div>
-      </div>
+      
     </div>
 
     <!-- DIA -->
@@ -1447,7 +2155,7 @@ body[data-page="dados"] #page-dados .dados-shell{
 <!-- Modal Produto -->
 <div class="modal-bg" id="modal-produto">
   <div class="modal">
-    <div class="modal-title" id="modal-prod-title">Novo Produto</div>
+    <div class="modal-title" id="modal-prod-title">➕ Novo Produto</div>
     <input type="hidden" id="edit-prod-idx">
     <div class="form-group"><label>Nome</label><input type="text" id="prod-nome" placeholder="Ex: Chocolate Lacta 180g"></div>
         <div class="form-group"><label>Categoria</label>
@@ -1467,7 +2175,7 @@ body[data-page="dados"] #page-dados .dados-shell{
     <div class="form-group"><label>Data de compra (para o estoque inicial)</label><input type="date" id="prod-data-compra"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-produto')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarProduto()">Salvar</button>
+      <button class="btn btn-primary" onclick="salvarProduto()">💾 Salvar</button>
     </div>
   </div>
 </div>
@@ -1980,7 +2688,7 @@ function renderProdutos(){
       +'<td style="display:flex;gap:6px">'
       +'<button class="btn btn-sm btn-secondary js-editar">Editar</button>'
       +'<button class="btn btn-sm btn-secondary js-baixa">Baixa</button>'
-      +'<button class="btn-del js-excluir">Excluir</button>'
+      +'<button class="btn-del js-excluir">🗑️ Excluir</button>'
       +'</td></tr>';
   });
   tbody.innerHTML=html;
@@ -2380,13 +3088,31 @@ function renderRelatorios(){
   // Relatórios (visão geral) — baseado em TODAS as vendas
   var vendidos = db.vendas.reduce(function(arr,v){ return arr.concat(v.itens||[]); }, []);
 
-  // Produto mais vendido (qtd)
+  
+  function setTop3(prefix, arr, fmtVal){
+    for(var i=0;i<3;i++){
+      var nameEl = document.getElementById('rel-top3-'+prefix+'-'+(i+1)+'-name');
+      var valEl  = document.getElementById('rel-top3-'+prefix+'-'+(i+1)+'-val');
+      if(!nameEl || !valEl) continue;
+      if(arr && arr[i]){
+        nameEl.textContent = arr[i][0];
+        valEl.textContent  = fmtVal(arr[i][1]);
+      }else{
+        nameEl.textContent = '—';
+        valEl.textContent  = '—';
+      }
+    }
+  }
+
+// Produto mais vendido (qtd)
   var qtdPorProd = {};
   vendidos.forEach(function(i){
     if(!i || !i.nome) return;
     qtdPorProd[i.nome] = (qtdPorProd[i.nome]||0) + Number(i.qtd||0);
   });
-  var topVend = Object.entries(qtdPorProd).sort(function(a,b){ return b[1]-a[1]; })[0];
+  var topVendArr = Object.entries(qtdPorProd).sort(function(a,b){ return b[1]-a[1]; });
+  var topVend = topVendArr[0];
+  setTop3('prod', topVendArr.slice(0,3), function(v){ return (v + ' un'); });
 
   var el1 = document.getElementById('rel-prod-mais-vendido');
   var el1sub = document.getElementById('rel-prod-mais-vendido-val');
@@ -2415,7 +3141,9 @@ function renderRelatorios(){
     var qtd = (v.itens||[]).reduce(function(s,i){ return s + Number(i.qtd||0); }, 0);
     itensPorCliente[cli] = (itensPorCliente[cli]||0) + qtd;
   });
-  var topCliItens = Object.entries(itensPorCliente).sort(function(a,b){ return b[1]-a[1]; })[0];
+  var topCliItensArr = Object.entries(itensPorCliente).sort(function(a,b){ return b[1]-a[1]; });
+  var topCliItens = topCliItensArr[0];
+  setTop3('comprou', topCliItensArr.slice(0,3), function(v){ return (v + ' un'); });
 
   // IDs corretos do HTML
   var elCmc = document.getElementById('rel-cliente-mais-comprou') || document.getElementById('rel-cliente-mais-itens');
@@ -2431,7 +3159,9 @@ function renderRelatorios(){
     if(!cli) return;
     gastoPorCliente[cli] = (gastoPorCliente[cli]||0) + Number(v.total||0);
   });
-  var topCliGasto = Object.entries(gastoPorCliente).sort(function(a,b){ return b[1]-a[1]; })[0];
+  var topCliGastoArr = Object.entries(gastoPorCliente).sort(function(a,b){ return b[1]-a[1]; });
+  var topCliGasto = topCliGastoArr[0];
+  setTop3('gastou', topCliGastoArr.slice(0,3), function(v){ return fmt(v); });
 
   var el4 = document.getElementById('rel-cliente-mais-gastou');
   var el4v = document.getElementById('rel-cliente-mais-gastou-val');
