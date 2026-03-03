@@ -3782,14 +3782,34 @@ function renderHistorico(){
   }).join('');
 }
 
+
+// ─── REGRAS DE COMPETÊNCIA (CAIXA) ──────────────────────────────────────────
+// Venda "paga" = pago imediato OU fiado quitado
+function isVendaPaga(v){
+  return (v && (v.pgto === 'pago' || (v.pgto === 'fiado' && v.fiadoPago)));
+}
+
+// Data de competência (para agrupar por mês/dia no regime de caixa)
+// - pago imediato: data da venda
+// - fiado quitado: data do pagamento (fiadoPagoData)
+function dataCompetenciaISO(v){
+  if(!v) return null;
+  if(v.pgto === 'fiado' && v.fiadoPago && v.fiadoPagoData) return v.fiadoPagoData;
+  return v.data || null;
+}
+
+
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
 var chartVendasInst=null;
 function renderDashboard(){
   var now=new Date();
   document.getElementById('dash-date').textContent=now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   var range=getFiltroRange();
-  function inRange(data){if(!range)return true;var d=new Date(data);return d>=range.start&&d<=range.end;}
-  var vendas=db.vendas.filter(function(v){return inRange(v.data);});
+  function inRange(data){if(!range)return true;if(!data)return false;var d=new Date(data);return d>=range.start&&d<=range.end;}
+    var vendas = (db.vendas||[]).filter(function(v){
+    if(!isVendaPaga(v)) return false;
+    return inRange(dataCompetenciaISO(v));
+  });
   var movEnt=db.movimentacoes.filter(function(m){return m.tipo==='entrada'&&inRange(m.data);});
   // Total investido = (gastos com compras no período) + (custo do estoque atual)
   // Ao excluir um produto (p.excluido=true), ele sai automaticamente destes cálculos.
@@ -3864,9 +3884,15 @@ for(var d=1; d<=lastDay; d++){
   labels.push(String(d));
   var dayStart = new Date(anoChart, mesChart, d, 0,0,0);
   var dayEnd = new Date(anoChart, mesChart, d, 23,59,59);
-  var somaDia = db.vendas
-    .filter(function(v){ var dv=new Date(v.data); return dv>=dayStart && dv<=dayEnd; })
-    .reduce(function(s,v){ return s+v.total; }, 0);
+  var somaDia = (db.vendas||[])
+    .filter(function(v){
+      if(!isVendaPaga(v)) return false;
+      var dc = dataCompetenciaISO(v);
+      if(!dc) return false;
+      var dv = new Date(dc);
+      return dv>=dayStart && dv<=dayEnd;
+    })
+    .reduce(function(s,v){ return s + Number(v.total||0); }, 0);
   valores.push(somaDia);
 }
 
@@ -4018,18 +4044,15 @@ function renderRelatoriosDia(){
     return (yyyy + '-' + mm + '-' + dd) === ymd;
   }
 
-  var vendasDia = (db.vendas||[]).filter(function(v){
-    return v && mesmaData(v.data, dia);
+    var vendasDia = (db.vendas||[]).filter(function(v){
+    return v && isVendaPaga(v) && mesmaData(dataCompetenciaISO(v), dia);
   });
 
-  // Totais do dia
+  // Totais do dia (regime de caixa)
   var receita = vendasDia.reduce(function(s,v){ return s + Number(v.total||0); }, 0);
 
-  // "Pago": conta apenas vendas pagas (pago imediato ou fiado quitado)
-  var pago = vendasDia.reduce(function(s,v){
-    var isPago = (v.pgto==='pago') || (v.pgto==='fiado' && v.fiadoPago);
-    return s + (isPago ? Number(v.total||0) : 0);
-  }, 0);
+  // "Pago": no diário, é igual à receita (já filtramos só pagas)
+  var pago = receita;
 
   // Lucro estimado do dia (soma lucro dos itens)
   var lucro = vendasDia.reduce(function(s,v){
@@ -4220,7 +4243,7 @@ function fifoConsumir(produtoIdx, qtd, silent){
 }
 
 function fmt(v){return 'R$ '+(v||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
-function fmtData(iso){return new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function fmtData(iso){return new Date(iso).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}
 function fmtDataSimples(iso){return new Date(iso).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
